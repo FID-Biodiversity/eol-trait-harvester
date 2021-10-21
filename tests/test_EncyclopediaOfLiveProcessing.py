@@ -1,11 +1,15 @@
-import pytest
-from eol_processing import EncyclopediaOfLifeProcessing, EolTrait
+import pathlib
 from typing import Iterable
+
+import pytest
+
+from coding.eol_provider_mapping.gbif_eol_mapping import EncyclopediaOfLifeProcessing, Triple
 
 
 @pytest.fixture
 def path_to_unzipped_eol_csv_files() -> str:
-    return '?'
+    current_directory = pathlib.Path(__file__).parent
+    return str(pathlib.Path(current_directory, 'data/test_provider_ids.csv').absolute())
 
 
 @pytest.fixture
@@ -92,7 +96,7 @@ class TestEolProcessing:
         assert trait_exists(eol_page_id, 'http://eol.org/schema/terms/Present', ' http://www.geonames.org/6252001',
                             taxon_trait_data)
         assert trait_exists(eol_page_id, 'http://eol.org/schema/terms/IntroducedRange',
-                                'http://www.geonames.org/6251999', taxon_trait_data)
+                            'http://www.geonames.org/6251999', taxon_trait_data)
 
     def test_filtering_of_trait_data(self, eol):
         """
@@ -116,7 +120,7 @@ class TestEolProcessing:
                                 'http://www.geonames.org/6251999', taxon_trait_data)
 
     @pytest.mark.parametrize(['eol_page_id', 'expected_gbif_id'],
-                             [('311544', '2437431'), ('1143547', '2882316')])
+                             [('21828356', '1057764'), ('52717353', '10577931')])
     def test_get_gbif_id_for_corresponding_eol_id(self, eol, eol_page_id, expected_gbif_id):
         """
         Feature: The module returns the correct GBIF taxon ID for an EOL page ID.
@@ -131,9 +135,9 @@ class TestEolProcessing:
         assert gbif_id == expected_gbif_id
 
 
-def trait_exists(subject: str, predicate: str, obj: str, trait_data: Iterable[EolTrait]) -> bool:
+def trait_exists(subject: str, predicate: str, obj: str, trait_data: Iterable[Triple]) -> bool:
     for trait in trait_data:
-        if trait.eol_id == subject and trait.predicate == predicate and trait.object == obj:
+        if trait.subject == subject and trait.predicate == predicate and trait.object == obj:
             return True
 
     return False
