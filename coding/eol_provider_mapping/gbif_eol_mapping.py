@@ -1,21 +1,14 @@
 # -*- coding: utf-8 -*-
+
 """
+Biofid project
+
 Mapping of eol and gbif pages
 https://eol.org/
 https://www.gbif.org/
 
 using provider_ids.csv as input from 
 https://opendata.eol.org/dataset/identifier-map
-
-sources used for coding:
-https://stackoverflow.com/questions/51097057/python-read-bigger-csv-line-by-line
-
-###########################
-passing pytests:
-# Test passed: if eol_page_id or/and provider_id is not valid than print
-              empty result
-# Test passed: enter eol_page_id and program gives correct output of
-               gbif_id or other provider_page_id based on the provider_id input
     
 """
 __author__ = "Ischa Tahir"
