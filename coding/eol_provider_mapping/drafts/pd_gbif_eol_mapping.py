@@ -29,7 +29,8 @@ organism_line = gbifs.loc[df['page_id'] == '57357772'] #Petroniptus
 #print()
 
 #return provider(gbif)-id
-print(organism_line['resource_pk'].values[0])
+provider_page_id =organism_line['resource_pk'].values[0]
+print(provider_page_id)
 
 
 #ende = time.time() #Endzeit // REMOVE TO SHOW TIME
