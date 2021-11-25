@@ -17,3 +17,9 @@ gbifs = traitslines.loc[traitslines['resource_id'] == '767'] #767 durch provider
 pageslines = pd.read_csv("pages.csv", dtype = str)
 # if eol_page_id == 'page_id'
 #     return parent_id
+
+#def get_habitat():
+
+
+#def get_geogr_distr():
+
