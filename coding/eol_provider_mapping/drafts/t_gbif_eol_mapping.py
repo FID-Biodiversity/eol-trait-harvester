@@ -1,5 +1,5 @@
 """
-testing read in with pandas as chunks
+testing read in as chunks
 
 """
 
