@@ -11,12 +11,8 @@ import pandas as pd
 #def traits_readin():
 traitslines = pd.read_csv("traits.csv", dtype = str)
 gbifs = traitslines.loc[traitslines['resource_id'] == '767'] #767 durch provider_id ersetzen
-#print(gbifs)#wegmachen
+print(gbifs)#wegmachen
 
-#def pages_readin():
-pageslines = pd.read_csv("pages.csv", dtype = str)
-# if eol_page_id == 'page_id'
-#     return parent_id
 
 #def get_habitat():
 
