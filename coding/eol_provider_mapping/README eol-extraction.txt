@@ -1,6 +1,6 @@
 eol-data
 ########
-- keine 767 Zeilen im gesamten traits-file
+- nimmt eol-page-id und gibt traits als triple aus (subject, predicate, object)
 - predicates-Funktionen Implementierung: ggf. Verallgemeinerung besser
   und nicht für jedes eine einzelne Funktion
 
