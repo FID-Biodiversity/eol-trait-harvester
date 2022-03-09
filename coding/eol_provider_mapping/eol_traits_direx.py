@@ -19,9 +19,11 @@ __copyright__ = "Senckenberg Gesellschaft für Naturforschung, \
 
 import csv
 
+traitsfile = "test_traits.csv" #change name/source of file here
+
 eol_page_id = "45258442"
 
-with open("test_traits.csv", encoding='utf-8') as csvfile:
+with open(traitsfile, encoding='utf-8') as csvfile:
     csv_text = csv.reader(csvfile)
     for line in csv_text:
         if eol_page_id in line:
