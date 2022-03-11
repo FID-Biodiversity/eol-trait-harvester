@@ -119,21 +119,6 @@ class TestEolProcessing:
         assert not trait_exists(eol_page_id, 'http://eol.org/schema/terms/IntroducedRange',
                                 'http://www.geonames.org/6251999', taxon_trait_data)
 
-    @pytest.mark.parametrize(['eol_page_id', 'expected_gbif_id'],
-                             [('21828356', '1057764'), ('52717353', '10577931')])
-    def test_get_gbif_id_for_corresponding_eol_id(self, eol, eol_page_id, expected_gbif_id):
-        """
-        Feature: The module returns the correct GBIF taxon ID for an EOL page ID.
-            Scenario: The user gives an EOL page ID as parameter.
-                GIVEN a valid EOL page ID is given as parameter.
-                THEN the function should return a string of the corresponding GBIF ID.
-
-        NOTE! This feature should be easily expandable. So, when I want to write a similar function for another
-            data provider, the implementation should make this easy.
-        """
-        gbif_id = eol.get_gbif_id_for_eol_page_id(eol_page_id)
-        assert gbif_id == expected_gbif_id
-
 
 def trait_exists(subject: str, predicate: str, obj: str, trait_data: Iterable[Triple]) -> bool:
     for trait in trait_data:
