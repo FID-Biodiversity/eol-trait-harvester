@@ -39,7 +39,7 @@ class TestIdentifierConverter:
         """ Feature: The module identifies an ambiguous ID from another data provider and returns
             the correct one.
         """
-        id_converter.relevant_data_providers = id_converter.relevant_data_providers + [DataProvider.WoRMS]
+        id_converter.relevant_data_providers.append(DataProvider.WoRMS)
         multiple_ids = id_converter.to_eol_page_id(provider_id)
         assert isinstance(multiple_ids, list)
         assert len(multiple_ids) == 2

@@ -54,7 +54,7 @@ def generate_dataframe_from_stream(stream, filter_criteria: Tuple[Union[str, int
 
 def _filter_stream(stream, filter_criteria: Tuple[Union[str, int]], column_index: Tuple[int], delimiter: str = ','
                    ) -> Generator[list, None, None]:
-    yield from (delimiter.join(split_line_data)
+    yield from (split_line_data
                 for split_line_data in _iterate_lines(stream, delimiter, split_line=True)
                 for n, index in enumerate(column_index, start=0)
                 if filter_criteria[n] == split_line_data[index])
