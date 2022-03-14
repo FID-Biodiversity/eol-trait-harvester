@@ -67,11 +67,9 @@ class IdentifierConverter:
     EOL_PAGE_ID_ROW_NAME = 'page_id'
     DATA_PROVIDER_ID_ROW_NAME = 'resource_id'
     CSV_DTYPES = {
-        'node_id': 'int',
         DATA_PROVIDER_ID_ROW_NAME: 'int',
         CORRESPONDING_ID_ROW_NAME: 'str',
         EOL_PAGE_ID_ROW_NAME: 'int',
-        'preferred_canonical_for_page': 'str'
     }
 
     def __init__(self, provider_csv_file_path: Union[str, pathlib.Path],
