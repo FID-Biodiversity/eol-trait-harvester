@@ -1,13 +1,13 @@
 import json
 import pathlib
 import re
-from typing import Protocol, Generator, Union, Optional, Any, Tuple, List
+from typing import Generator, Union, Optional, Any, Tuple, List
 
 import pandas as pd
 import requests
 
 
-class DataHandler(Protocol):
+class DataHandler:
     """ An interface class for all EOL sources.
         All Handler classes should obey this schema, although not inherit from it.
     """
