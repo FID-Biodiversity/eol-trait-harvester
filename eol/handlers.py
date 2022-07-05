@@ -12,7 +12,7 @@ class DataHandler:
         All Handler classes should obey this schema, although not inherit from it.
     """
     def iterate(self) -> Generator[dict, None, None]:
-        """ Returns a generator yielding normalized view of the items in the data source. """
+        """ Returns a generator yielding the items in the data source. """
         ...
 
     def get_data_filtered_by_value(self, key: str, value: Any) -> dict:
@@ -60,7 +60,7 @@ class EolTraitCsvHandler:
         self._data: Optional[pd.DataFrame] = None
 
     def iterate(self) -> Generator[dict, None, None]:
-        """ Returns a generator yielding normalized view of the items in the data source. """
+        """ Returns a generator yielding the items in the data source. """
         for index, csv_row_data in self.get_data().iterrows():
             yield convert_pandas_object_to_dict(csv_row_data)
 
@@ -92,7 +92,7 @@ class EolTraitApiHandler:
         self.session = create_http_session(api_credentials)
 
     def iterate(self) -> Generator[dict, None, None]:
-        """ Returns a generator yielding normalized view of the items in the data source. """
+        """ Returns a generator yielding the items in the data source. """
         iterate_everything_query_string = 'MATCH (trait:Trait) RETURN trait LIMIT 100;'
         for response in self.paginate_cypher_api(iterate_everything_query_string):
             raise_if_response_contains_error(response)
