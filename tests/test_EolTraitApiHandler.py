@@ -11,13 +11,15 @@ from eol.handlers import EolTraitApiHandler
 
 def internet_connection_available():
     try:
-        requests.get('https://www.duckduckgo.com/')
+        requests.get("https://www.duckduckgo.com/")
         return True
     except requests.exceptions.ConnectionError:
         return False
 
 
-@pytest.mark.skipif(not internet_connection_available(), reason='No internet connection available')
+@pytest.mark.skipif(
+    not internet_connection_available(), reason="No internet connection available"
+)
 class TestEolTraitApiHandlerWebCalls:
     def test_get_next(self, eol_trait_api_handler):
         cypher_api = eol_trait_api_handler.iterate()
@@ -33,6 +35,16 @@ class TestEolTraitApiHandlerWebCalls:
             cypher_query_string_for_habitat_data
         )
         assert len(response) == 5
+
+    def test_iterate_data_by_key(self, eol_trait_api_handler):
+        key_name = "pred.uri"
+        value = "http://purl.obolibrary.org/obo/RO_0002303"
+        data_generator = eol_trait_api_handler.iterate_data_by_key(
+            key=key_name, value=value
+        )
+
+        data = next(data_generator)
+        assert data[key_name] == value
 
 
 class TestEolTraitApiHandlerUnittests:
@@ -64,7 +76,7 @@ class TestEolTraitApiHandlerUnittests:
             eol_trait_api_handler.read_api_with_parameters.assert_any_call(query)
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def eol_trait_api_handler(eol_api_credentials):
     return EolTraitApiHandler(api_credentials=eol_api_credentials)
 

@@ -51,15 +51,41 @@ def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:
 
 if __name__ == '__main__':
     # How to use the DataHandler and Normalizer in conjunction
-    from eol.handlers import EolTraitCsvHandler
+    from eol.handlers import EolTraitCsvHandler, EolTraitApiHandler
     from pprint import pprint
 
     # Get the data from the data source
+    # Watch out! The `iterate_data_by_key` method returns a Generator. To get the single elements from it,
+    # you have to call either next() on the same Generator object repeatedly or use it in a for-loop.
+    # Example:
+    #           for elem in handler.iterate_data_by_key(key='page_id', value=45258442):
+    #               # do stuff with elem (which is an data element), no need to call next, in this case!
     handler = EolTraitCsvHandler('../tests/data/test_eol_traits.csv')
-    non_normalized_data = handler.get_data_filtered_by_value(key='page_id', value=45258442)
+    non_normalized_csv_data = next(handler.iterate_data_by_key(key='page_id', value=45258442))
 
     # Normalize the data
     normalizer = EolTraitCsvNormalizer()
-    normalized_data = normalizer.normalize(non_normalized_data)
+    normalized_data = normalizer.normalize(non_normalized_csv_data)
 
+    pprint('Data from CSV File')
+    pprint(normalized_data)
+
+    # Example of how to get data from the EOL API
+    from dotenv import load_dotenv
+    import os
+    load_dotenv('../tests/.env')
+
+    eol_api_token = f"JWT {os.environ['EOL_API_TOKEN']}"
+    handler = EolTraitApiHandler(eol_api_token)
+
+    # Watch out! The key has to be the Cypher variable you are specifically interested. However, in our cases, you
+    # probably only need to change the `value` parameter anyway.
+    # The consideration to use next or a for-loop (see above), applies here too.
+    non_normalized_api_data = next(handler.iterate_data_by_key(key='pred.uri',
+                                                               value='http://purl.obolibrary.org/obo/RO_0002303'))
+
+    normalizer = EolTraitApiNormalizer()
+    normalized_data = normalizer.normalize(non_normalized_api_data)
+
+    pprint('Data from EOL API')
     pprint(normalized_data)
