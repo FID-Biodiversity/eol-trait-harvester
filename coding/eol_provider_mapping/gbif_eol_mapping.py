@@ -19,6 +19,7 @@ import csv
 import pathlib
 from dataclasses import dataclass
 from typing import Optional, Union, List
+from eol import handlers, normalization #nutze STRING für triple ausgabe
 
 
 @dataclass
@@ -44,7 +45,17 @@ class EncyclopediaOfLifeProcessing:
             When `recursive` is True, the returned list contains traits for both the taxon associated with the given
             EOL page ID and all lower hierarchical species recursively.
         """
-        pass
+        pass #ausgabe der triples
+        
+    #def generate_triple() #input: normalisierte daten, output: Generierung triple
+    """
+    [subject, predicate, object(s)]
+    [x, y, z]
+    [x, y, [z1, z2]] [x, y z1], [x, y, z2]
+    
+    
+    TEST=normalization.PAGE_ID_STRING
+    """ 
 
 
 def eol_provider_mapping(source_csv_file: str, eol_page_id: Union[str, int], provider_id: Optional[str] = None):
@@ -65,5 +76,21 @@ def eol_provider_mapping(source_csv_file: str, eol_page_id: Union[str, int], pro
                 break
 
     return provider_page_id
+"""
+def retrn_object():
+    if ...:
+        ## für spalte A
+    else if...:
+        ## für spalte B
+    else if ...:
+        ##für spalte C
+"""
+        
+#kreiere default: obj-spalten nehmen
+        #und nur wenn best. predicate dann wirds umgeändert
+        
+#eingabe eines predicates
+        
+#wörterbuch funktion
 
 

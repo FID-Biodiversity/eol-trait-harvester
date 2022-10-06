@@ -6,14 +6,13 @@ from typing import Generator, Union, Optional, Any, Tuple, List
 import pandas as pd
 import requests
 
-
 class DataHandler:
     """ An interface class for all EOL sources.
         All Handler classes should obey this schema, although not inherit from it.
     """
     def iterate(self) -> Generator[dict, None, None]:
         """ Returns a generator yielding the items in the data source. """
-        ...
+        #csv/api  yield statt return
 
     def get_data_filtered_by_value(self, key: str, value: Any) -> dict:
         """ Get the dataset available, but filtered the value of the given key.
@@ -170,11 +169,11 @@ def extract_limit_count_and_string(query_string: str) -> Tuple[str, str]:
 
 
 def raise_if_response_contains_error(response):
-    if response.status_code != 200:
+    if response.status_code != 200: #http code for recheck
         raise SyntaxError(f'The EOL API returned with an error! Message: {response}')
 
 
-def convert_pandas_object_to_dict(pandas_obj) -> dict:
+def convert_pandas_object_to_dict(pandas_obj) -> dict: #csv
     if isinstance(pandas_obj, pd.Series):
         new_dict = dict(pandas_obj.to_dict())
     else:
@@ -198,3 +197,4 @@ if __name__ == '__main__':
     eol = EolTraitCsvHandler('../tests/data/test_eol_traits.csv')
     data = eol.get_data_filtered_by_value(key='page_id', value=45258442)
     pprint(data)
+

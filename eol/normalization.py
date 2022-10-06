@@ -1,4 +1,7 @@
 from copy import copy
+#from triplegenerator import TripleGenerator
+import triplegenerator
+import variables
 
 
 class Normalizer:
@@ -26,18 +29,30 @@ class Normalizer:
         for key_to_delete in self.delete_keys:
             if key_to_delete in data_copy:
                 del data_copy[key_to_delete]
+               
+        print(self.normalized_keys)
 
         return data_copy
 
 
 class EolTraitCsvNormalizer(Normalizer):
     """ This class normalizes the data provided by the EolTraitCsvHandler. """
-    pass
+    normalized_keys = {'page_id': variables.PAGE_ID_STRING,#importiert aus variables.py
+                       'predicate': variables.PREDICATE_STRING, 
+                       'value_uri': variables.VALUEURI_STRING,
+                       'literal': variables.LITERAL_STRING,
+                       'normal_measurement': variables.NORMALMSM_STRING,
+                       'normal_units_uri': variables.NORMAL_UNITSURI_STRING,
+                       'units_uri': variables.NORMAL_UNITSURI_STRING
+                       }
+                        #normal_units_uri, normal_units, units_uri, units #nur verwendbare Daten
+                        #normal_units_uri, units_uri
 
 
 class EolTraitApiNormalizer(Normalizer):
     """ This class normalizes the data provided by the EolTraitApiHandler. """
     pass
+    #eol.org variablen 
 
 
 def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:
@@ -51,15 +66,20 @@ def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:
 
 if __name__ == '__main__':
     # How to use the DataHandler and Normalizer in conjunction
-    from eol.handlers import EolTraitCsvHandler
+    from handlers import EolTraitCsvHandler#, EolTraitApiHandler
     from pprint import pprint
 
     # Get the data from the data source
-    handler = EolTraitCsvHandler('../tests/data/test_eol_traits.csv')
+    handler = EolTraitCsvHandler('../tests/data/test_eol_traits.csv')#Object instanziert
     non_normalized_data = handler.get_data_filtered_by_value(key='page_id', value=45258442)
+    ###non_normalized_data
 
     # Normalize the data
     normalizer = EolTraitCsvNormalizer()
     normalized_data = normalizer.normalize(non_normalized_data)
+    
+    #TRIPLEGENERATOR: input
+    triple_generator = triplegenerator.TripleGenerator()
+    triples = triple_generator.create_triples(normalized_data)
 
     pprint(normalized_data)
