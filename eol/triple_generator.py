@@ -20,7 +20,16 @@ class Triple:
     subject: str
     predicate: str
     object: str
-
+    
+    def __hash__(self):
+        return hash((self.subject, self.predicate, self.object))
+    
+def dedoublicate_triple(triples):
+    """ data from list -> set -> sorted list """
+    triple_set = set(triples) #data from list -> set (unsorted)
+    return sorted(triple_set, key=lambda triple: triple.subject)#way of sorting
+    #lambda takes triple and returns triple
+    
 
 class TripleGenerator:
     """Generates Triple objects from a given normalized dataset."""
@@ -29,7 +38,8 @@ class TripleGenerator:
         obj = Objectclass_objuri()
         triples = []
         triples = obj.create_triple(triple_data, triples)
-        return triples
+        return dedoublicate_triple(triples)
+    
 
 
 class Objectclass_objuri:
@@ -37,7 +47,7 @@ class Objectclass_objuri:
     if object information is in obj.uri and obj.name"""
 
     def create_triple(self, triple_data, triples):
-        obj_value = triple_data.get(variables.VALUEURI_STRING)
+        obj_value = triple_data.get(variables.VALUEURI_STRING)#gibt None zurück wenn kein Wert drin ist
         if obj_value is not None:
             triple = create_triple(triple_data, obj_value)
             triples.append(triple)
