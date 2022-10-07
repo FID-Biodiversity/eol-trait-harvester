@@ -1,7 +1,6 @@
 from copy import copy
-#from triplegenerator import TripleGenerator
-import triplegenerator
-import variables
+from eol.triple_generator import TripleGenerator
+import eol.variables as variables
 
 
 class Normalizer:
@@ -29,15 +28,13 @@ class Normalizer:
         for key_to_delete in self.delete_keys:
             if key_to_delete in data_copy:
                 del data_copy[key_to_delete]
-               
-        print(self.normalized_keys)
 
         return data_copy
 
 
 class EolTraitCsvNormalizer(Normalizer):
     """ This class normalizes the data provided by the EolTraitCsvHandler. """
-    normalized_keys = {'page_id': variables.PAGE_ID_STRING,#importiert aus variables.py
+    normalized_keys = {'page_id': variables.PAGE_ID_STRING,  # importiert aus variables.py
                        'predicate': variables.PREDICATE_STRING, 
                        'value_uri': variables.VALUEURI_STRING,
                        'literal': variables.LITERAL_STRING,
@@ -59,6 +56,9 @@ def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:
     """ Assigns the new_key the value of old_key and removes old_key from the data.
         The exchange is done in-place.
     """
+    if old_key == new_key:
+        return
+
     if old_key in data:
         data[new_key] = data[old_key]
         del data[old_key]
@@ -82,11 +82,13 @@ if __name__ == '__main__':
     # Normalize the data
     normalizer = EolTraitCsvNormalizer()
     normalized_data = normalizer.normalize(non_normalized_csv_data)
-	
-	#TRIPLEGENERATOR: input
-    triple_generator = triplegenerator.TripleGenerator()
+
+    # Generate triples
+    triple_generator = TripleGenerator()
     triples = triple_generator.create_triples(normalized_data)
 
+    pprint('Generated Triples')
+    pprint(triples)
 
     pprint('Data from CSV File')
     pprint(normalized_data)

@@ -9,11 +9,16 @@ class TestEolTraitCsvHandler:
         assert isinstance(item, dict)
 
     def test_iterate_data_by_key(self, eol_traits_csv_handler):
-
-        data = next(eol_traits_csv_handler.iterate_data_by_key(
-            key="page_id", value=45258442
-        ))
+        data = next(
+            eol_traits_csv_handler.iterate_data_by_key(key="page_id", value=45258442)
+        )
         assert data["eol_pk"] == "R533-PK221522710"
+
+    def test_nan_values_are_converted_to_none(self, eol_traits_csv_handler):
+        data = next(
+            eol_traits_csv_handler.iterate_data_by_key(key="page_id", value=45258442)
+        )
+        assert data["object_page_id"] is None
 
     @pytest.fixture
     def eol_traits_csv_handler(self, resource_directory):

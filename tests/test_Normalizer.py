@@ -9,7 +9,8 @@ class TestNormalizer:
         assert normalized_data == {
             'normalized-key': 12345,
             'another-key': 'foo',
-            'normalized-key-1': 'bar'
+            'normalized-key-1': 'bar',
+            'already-normalized-key': 'foobar'
         }
 
     @pytest.fixture
@@ -22,14 +23,16 @@ class TestNormalizer:
             'non-normalized-key': 12345,
             'another-key': 'foo',
             'un_normalized_key-1': 'bar',
-            'key-to-delete': 'buzz'
+            'key-to-delete': 'buzz',
+            'already-normalized-key': 'foobar'
         }
 
 
 class DummyNormalizer(Normalizer):
     normalized_keys = {
         'non-normalized-key': 'normalized-key',
-        'un_normalized_key-1': 'normalized-key-1'
+        'un_normalized_key-1': 'normalized-key-1',
+        'already-normalized-key': 'already-normalized-key'
     }
 
     delete_keys = ['key-to-delete']

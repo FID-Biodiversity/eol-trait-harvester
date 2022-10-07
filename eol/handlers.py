@@ -3,8 +3,10 @@ import pathlib
 import re
 from typing import Generator, Union, Optional, Any, Tuple, List
 
+import numpy as np
 import pandas as pd
 import requests
+
 
 class DataHandler:
     """An interface class for all EOL sources.
@@ -87,9 +89,13 @@ class EolTraitCsvHandler:
         return self._data
 
     def _create_data(self) -> pd.DataFrame:
-        return pd.read_csv(
+        data = pd.read_csv(
             self.csv_file_path, usecols=self.required_columns, dtype=self.column_types
         )
+        # Replace all NaN values with None
+        data = data.replace({np.nan: None})
+
+        return data
 
 
 class EolTraitApiHandler:
