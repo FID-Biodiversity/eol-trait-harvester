@@ -88,7 +88,7 @@ class Objectclass_meas_units:
 def create_triple(triple_data, obj_value):
     subject = triple_data[variables.PAGE_ID_STRING]
     predicate = triple_data[variables.PREDICATE_STRING]
-    return Triple(subject, predicate, obj_value)
+    return Triple(str(subject), predicate, obj_value)
 
 
 # (subject, predicate, obj)
