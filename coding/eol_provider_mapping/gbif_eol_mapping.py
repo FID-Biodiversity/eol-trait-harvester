@@ -20,13 +20,9 @@ import pathlib
 from dataclasses import dataclass
 from typing import Optional, Union, List
 from eol import handlers, normalization #nutze STRING für triple ausgabe
-
-
-@dataclass
-class Triple:
-    subject: str
-    predicate: str
-    object: str
+from eol.triple_generator import Triple, TripleGenerator
+from eol.normalization import EolTraitCsvNormalizer
+from eol.handlers import EolTraitCsvHandler
 
 
 class EncyclopediaOfLifeProcessing:
@@ -45,17 +41,16 @@ class EncyclopediaOfLifeProcessing:
             When `recursive` is True, the returned list contains traits for both the taxon associated with the given
             EOL page ID and all lower hierarchical species recursively.
         """
-        pass #ausgabe der triples
-        
-    #def generate_triple() #input: normalisierte daten, output: Generierung triple
-    """
-    [subject, predicate, object(s)]
-    [x, y, z]
-    [x, y, [z1, z2]] [x, y z1], [x, y, z2]
-    
-    
-    TEST=normalization.PAGE_ID_STRING
-    """ 
+        handler = EolTraitCsvHandler('../tests/data/test_eol_traits.csv')
+        non_normalized_csv_data = next(handler.iterate_data_by_key(key='page_id', value=45258442))
+
+        # Normalize the data
+        normalizer = EolTraitCsvNormalizer()
+        normalized_data = normalizer.normalize(non_normalized_csv_data)
+
+        # Generate triples
+        triple_generator = TripleGenerator()
+        triples = triple_generator.create_triples(normalized_data) #ausgabe der triples
 
 
 def eol_provider_mapping(source_csv_file: str, eol_page_id: Union[str, int], provider_id: Optional[str] = None):
