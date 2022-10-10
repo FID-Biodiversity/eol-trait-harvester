@@ -141,6 +141,19 @@ class TestEolProcessing:
         gbif_id = eol.get_gbif_id_for_eol_page_id(eol_page_id)
         assert gbif_id == expected_gbif_id
 
+    @pytest.mark.parametrize(
+        ["gbif_id", "expected_eol_page_id"],
+        [("1057764", "21828356"), ("10577931", "52717353")],
+    )
+    def test_get_eol_id_for_corresponding_gbif_id(
+        self, eol, gbif_id, expected_eol_page_id
+    ):
+        """
+        Feature: The module returns the correct EOL page ID for a given GBIF ID.
+        """
+        eol_page_id = eol.get_eol_page_id_from_gbif_id(gbif_id)
+        assert eol_page_id == expected_eol_page_id
+
 
 def trait_exists(
     subject: str, predicate: str, obj: str, trait_data: Iterable[Triple]

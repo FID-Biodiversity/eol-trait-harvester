@@ -16,11 +16,9 @@ from eol.triple_generator import Triple, TripleGenerator, deduplicate_triples
 
 
 class EncyclopediaOfLifeProcessing:
-    """ The main interface for retrieving EOL data."""
+    """The main interface for retrieving EOL data."""
 
-    RELEVANT_DATA_PROVIDERS = [
-        DataProvider.Gbif
-    ]
+    RELEVANT_DATA_PROVIDERS = [DataProvider.Gbif]
 
     def __init__(
         self,
@@ -31,8 +29,7 @@ class EncyclopediaOfLifeProcessing:
         self.data_handler = data_handler
         self.data_normalizer = data_normalizer
         self.identifier_converter = IdentifierConverter(
-            data_provider_mapping_csv_file_path,
-            self.RELEVANT_DATA_PROVIDERS
+            data_provider_mapping_csv_file_path, self.RELEVANT_DATA_PROVIDERS
         )
 
     def get_gbif_id_for_eol_page_id(self, eol_page_id: Union[str, int]) -> str:
@@ -40,6 +37,10 @@ class EncyclopediaOfLifeProcessing:
         return self.identifier_converter.from_eol_page_id(
             eol_page_id, DataProvider.Gbif
         )
+
+    def get_eol_page_id_from_gbif_id(self, gbif_id: Union[str, int]) -> str:
+        """Returns the corresponding EOL page ID for a given GBIF ID."""
+        return self.identifier_converter.to_eol_page_id(gbif_id, DataProvider.Gbif)
 
     def get_trait_data_for_eol_page_id(
         self, eol_page_id: str, filter_by_predicate: List[str] = None
