@@ -4,6 +4,7 @@ Created on Mon Sep 19 10:34:39 2022
 
 @author: TAHIR
 """
+from typing import Optional
 
 import eol.variables as variables
 from dataclasses import dataclass
@@ -20,16 +21,12 @@ class Triple:
     subject: str
     predicate: str
     object: str
+    unit: Optional[str] = None
+    # TODO: Add source incl. tests
     
     def __hash__(self):
         return hash((self.subject, self.predicate, self.object))
-    
-def dedoublicate_triple(triples):
-    """ data from list -> set -> sorted list """
-    triple_set = set(triples) #data from list -> set (unsorted)
-    return sorted(triple_set, key=lambda triple: triple.subject)#way of sorting
-    #lambda takes triple and returns triple
-    
+
 
 class TripleGenerator:
     """Generates Triple objects from a given normalized dataset."""
@@ -38,9 +35,8 @@ class TripleGenerator:
         obj = Objectclass_objuri()
         triples = []
         triples = obj.create_triple(triple_data, triples)
-        return dedoublicate_triple(triples)
+        return deduplicate_triples(triples)
     
-
 
 class Objectclass_objuri:
     """underclass TripleGenerator:
@@ -75,21 +71,22 @@ class Objectclass_meas_units:
     if object information is in t.normal_measurement, units.uri, units.name"""
 
     def create_triple(self, triple_data, triples):
-        obj_value1 = triple_data.get(variables.NORMALMSM_STRING)
-        obj_value2 = triple_data.get(variables.NORMAL_UNITSURI_STRING)
-        if obj_value1 is not None and obj_value2 is not None:
-            triple1 = create_triple(triple_data, obj_value1)
-            triple2 = create_triple(triple_data, obj_value2)
-            triples.append(triple1)
-            triples.append(triple2)
+        quantity = triple_data.get(variables.NORMALMSM_STRING)
+        quantity_unit = triple_data.get(variables.NORMAL_UNITSURI_STRING)
+        if quantity is not None and quantity_unit is not None:
+            triple = create_triple(triple_data, quantity, quantity_unit)
+            triples.append(triple)
         return triples  # gibt komplette triples-Liste zurück, chain of responsibility zu Ende
 
 
-def create_triple(triple_data, obj_value):
+def create_triple(triple_data: dict, obj_value: str, unit: str = None):
     subject = triple_data[variables.PAGE_ID_STRING]
     predicate = triple_data[variables.PREDICATE_STRING]
-    return Triple(str(subject), predicate, obj_value)
+    return Triple(str(subject), predicate, obj_value, unit=unit)
 
 
-# (subject, predicate, obj)
-# [(subject, predicate, obj1), (subject, predicate, obj2)]
+def deduplicate_triples(triples):
+    """ data from list -> set -> sorted list """
+    triple_set = set(triples)  # data from list -> set (unsorted)
+    return sorted(triple_set, key=lambda triple: (triple.subject, triple.predicate))  # way of sorting
+    # lambda takes triple and returns the triple's subject

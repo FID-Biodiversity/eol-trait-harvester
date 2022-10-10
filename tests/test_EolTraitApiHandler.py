@@ -4,17 +4,9 @@ from dataclasses import dataclass
 from unittest.mock import Mock
 
 import pytest
-import requests
 
 from eol.handlers import EolTraitApiHandler
-
-
-def internet_connection_available():
-    try:
-        requests.get("https://www.duckduckgo.com/")
-        return True
-    except requests.exceptions.ConnectionError:
-        return False
+from tests.commons import internet_connection_available
 
 
 @pytest.mark.skipif(
@@ -76,7 +68,7 @@ class TestEolTraitApiHandlerUnittests:
             eol_trait_api_handler.read_api_with_parameters.assert_any_call(query)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def eol_trait_api_handler(eol_api_credentials):
     return EolTraitApiHandler(api_credentials=eol_api_credentials)
 

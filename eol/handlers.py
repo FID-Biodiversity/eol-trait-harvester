@@ -53,12 +53,7 @@ class EolTraitCsvHandler:
         "literal",
     ]
 
-    column_types = {
-        "page_id": "int64",
-        "resource_id": "int16",
-        "value_uri": "category",
-        "predicate": "category",
-    }
+    column_types = {"page_id": "int64", "resource_id": "int16"}
 
     def __init__(self, csv_file_path: Union[pathlib.Path, str]):
         if not isinstance(csv_file_path, pathlib.Path):
@@ -103,6 +98,8 @@ class EolTraitApiHandler:
     This is a DataHandler class and obeys the DataHandler interface.
     """
 
+    parameter_name_normalizations = {"page_id": "p.page_id"}
+
     def __init__(self, api_credentials):
         self.api_credentials = api_credentials
         self.session = create_http_session(api_credentials)
@@ -119,6 +116,8 @@ class EolTraitApiHandler:
         If a `value` is given, only data having this value will be returned.
         If the key and/or the value cannot be found, an empty DataFrame is returned.
         """
+        key = self.normalize_key_parameter(key)
+
         filtered_iteration_string = self.convert_key_value_pairs_to_cypher_query(
             keys=[key], values=[value]
         )
@@ -132,6 +131,9 @@ class EolTraitApiHandler:
 
             for data in self.convert_cypher_response_data_to_list(response.text):
                 yield data
+
+    def normalize_key_parameter(self, parameter_name: str) -> str:
+        return self.parameter_name_normalizations.get(parameter_name, parameter_name)
 
     def get_data_from_cypher_api(self, cypher_query_string: str) -> List[dict]:
         """Calls the EOL Cypher API and returns the response as dict.
@@ -186,7 +188,7 @@ class EolTraitApiHandler:
 
     def _is_data_response_empty(self, cypher_response) -> bool:
         empty_data_indication_string = '"data":[]'
-        return empty_data_indication_string in cypher_response.text.replace(': ', ':')
+        return empty_data_indication_string in cypher_response.text.replace(": ", ":")
 
     def extract_limit_count_and_string(self, query_string: str) -> Tuple[str, str]:
         """Returns the limit count and the complete limit string, in this order."""
@@ -210,10 +212,12 @@ class EolTraitApiHandler:
     def convert_key_value_pairs_to_cypher_query(
         self, keys: List[str], values: List[str], query_limit: int = 100
     ) -> str:
+        values = [f'"{v}"' if str(v).startswith("http") else v for v in values]
+
         return f"""MATCH (t:Trait)<-[:trait]-(p:Page),
     (t)-[:supplier]->(r:Resource),
     (t)-[:predicate]->(pred:Term)
-    WHERE {' AND '.join(f'{key} = "{value}"' for key, value in zip(keys, values))}
+    WHERE {' AND '.join(f'{key} = {value}' for key, value in zip(keys, values))}
     OPTIONAL MATCH (t)-[:object_term]->(obj:Term)
     OPTIONAL MATCH (t)-[:normal_units_term]->(units:Term)
     RETURN r.resource_id, t.eol_pk, t.resource_ok, t.source,
@@ -237,14 +241,14 @@ def create_http_session(credentials=None, headers: dict = None) -> requests.Sess
 
 
 def extract_limit_count_and_string(query_string: str) -> Tuple[str, str]:
-    """ Returns the limit count and the complete limit string, in this order. """
-    regex_limit_count = re.search('(LIMIT ([0-9]+))', query_string, re.IGNORECASE)
+    """Returns the limit count and the complete limit string, in this order."""
+    regex_limit_count = re.search("(LIMIT ([0-9]+))", query_string, re.IGNORECASE)
     return regex_limit_count.group(2), regex_limit_count.group(1)
 
 
 def raise_if_response_contains_error(response):
-    if response.status_code != 200: #http code for recheck
-        raise SyntaxError(f'The EOL API returned with an error! Message: {response}')
+    if response.status_code != 200:  # http code for recheck
+        raise SyntaxError(f"The EOL API returned with an error! Message: {response}")
 
 
 def convert_pandas_object_to_dict(pandas_obj) -> dict:
@@ -264,4 +268,3 @@ if __name__ == "__main__":
     eol = EolTraitCsvHandler("../tests/data/test_eol_traits.csv")
     data = next(eol.iterate_data_by_key(key="page_id", value=45258442))
     pprint(data)
-

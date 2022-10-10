@@ -1,22 +1,9 @@
-import pathlib
 from typing import Iterable
 
 import pytest
 
-from coding.eol_provider_mapping.gbif_eol_mapping import EncyclopediaOfLifeProcessing, Triple
-
-
-@pytest.fixture
-def path_to_unzipped_eol_csv_files() -> str:
-    current_directory = pathlib.Path(__file__).parent
-    return str(pathlib.Path(current_directory, 'data/test_provider_ids.csv').absolute())
-
-
-@pytest.fixture
-def eol(path_to_unzipped_eol_csv_files) -> EncyclopediaOfLifeProcessing:
-    eol = EncyclopediaOfLifeProcessing()
-    eol.csv_path = path_to_unzipped_eol_csv_files
-    return eol
+from eol import EncyclopediaOfLifeProcessing
+from eol.triple_generator import Triple
 
 
 class TestEolProcessing:
@@ -35,8 +22,9 @@ class TestEolProcessing:
             but will be fast to process! Of course, this test data should be check-in into the repo.
     """
 
-    @pytest.mark.parametrize('eol_page_id', ['1234', '-1'])
-    def test_page_id_is_not_valid(self, eol, eol_page_id):
+    @pytest.mark.parametrize("eol_page_id", ["1234", "-1"])
+    @pytest.mark.parametrize("eol", ["csv", "api"], indirect=True)
+    def test_page_id_is_not_valid(self, eol: EncyclopediaOfLifeProcessing, eol_page_id):
         """
         Feature: Function does not throw but returns empty result
             Scenario: The user gives an invalid EOL page ID.
@@ -47,7 +35,12 @@ class TestEolProcessing:
         species_traits = eol.get_trait_data_for_eol_page_id(eol_page_id)
         assert len(species_traits) == 0
 
-    def test_non_recursive_data_retrieval(self, eol):
+    @pytest.mark.parametrize(
+        ["eol", "expected_trait_count"], [("csv", 7), ("api", 89)], indirect=["eol"]
+    )
+    def test_non_recursive_data_retrieval(
+        self, eol: EncyclopediaOfLifeProcessing, expected_trait_count
+    ):
         """
         Feature: Retrieval of taxon trait data from EOL CSV
             Scenario: The user gives a EOL page ID as parameter and wants only the data for the given EOL page ID.
@@ -55,30 +48,10 @@ class TestEolProcessing:
                 WHEN the EOL page ID is valid
                 THEN the function should return a list containing the EOL trait data for only the given EOL page ID.
         """
-        species_traits = eol.get_trait_data_for_eol_page_id('311544')
-        assert len(species_traits) == 48
+        species_traits = eol.get_trait_data_for_eol_page_id("311544")
+        assert len(species_traits) == expected_trait_count
 
-    @pytest.mark.parametrize(('eol_page_id', 'expected_number_of_traits'),
-                             [('2926916', 64), ('1143547', 41)])
-    def test_recursive_data_retrieval(self, eol, eol_page_id, expected_number_of_traits):
-        """
-        Feature: Retrieval of nested data from EOL CSV
-            Scenario: The user gives a EOL page ID as parameter.
-                GIVEN an EOL page ID is given as parameter
-                WHEN the EOL page ID is valid
-                    AND is a higher systematic level (e.g. Order or Family)
-                    AND the function is provided with a recursion flag (e.g. recursive=True)
-                THEN the function should return a list containing the EOL trait data for
-                    - all direct children
-                    - all nested children
-                    - the given EOL page ID
-
-        I hope, the numbers of traits are correct! If not, we have to discuss who is right (the code or Adrian [Spoiler:
-        Most of the time, it is the code!]).
-        """
-        species_traits = eol.get_trait_data_for_eol_page_id(eol_page_id, recursive=True)
-        assert len(species_traits) == expected_number_of_traits
-
+    @pytest.mark.parametrize(["eol"], [("csv",), ("api",)], indirect=True)
     def test_correct_trait_data_is_retrieved(self, eol):
         """
         Feature: The module returns a set of EolData data class objects (https://docs.python.org/3/library/dataclasses.html)
@@ -87,17 +60,30 @@ class TestEolProcessing:
                 GIVEN a valid EOL page ID is given as parameter
                 THEN the function should return a set of EolTrait objects with the correct data.
         """
-        eol_page_id = '1143547'
+        eol_page_id = "1143547"
         taxon_trait_data = eol.get_trait_data_for_eol_page_id(eol_page_id)
 
-        assert isinstance(taxon_trait_data, set)
-        assert trait_exists(eol_page_id, 'http://rs.tdwg.org/dwc/terms/habitat',
-                            'http://purl.obolibrary.org/obo/ENVO_00000446', taxon_trait_data)
-        assert trait_exists(eol_page_id, 'http://eol.org/schema/terms/Present', ' http://www.geonames.org/6252001',
-                            taxon_trait_data)
-        assert trait_exists(eol_page_id, 'http://eol.org/schema/terms/IntroducedRange',
-                            'http://www.geonames.org/6251999', taxon_trait_data)
+        assert isinstance(taxon_trait_data, list)
+        assert trait_exists(
+            eol_page_id,
+            "http://rs.tdwg.org/dwc/terms/habitat",
+            "http://purl.obolibrary.org/obo/ENVO_01000024",
+            taxon_trait_data,
+        )
+        assert trait_exists(
+            eol_page_id,
+            "http://eol.org/schema/terms/Present",
+            "http://www.geonames.org/6252001",
+            taxon_trait_data,
+        )
+        assert trait_exists(
+            eol_page_id,
+            "http://eol.org/schema/terms/IntroducedRange",
+            "http://www.marineregions.org/mrgid/1914",
+            taxon_trait_data,
+        )
 
+    @pytest.mark.parametrize(["eol"], [("csv",), ("api",)], indirect=True)
     def test_filtering_of_trait_data(self, eol):
         """
         Feature: The module filters the returned trait data by given filters.
@@ -107,21 +93,42 @@ class TestEolProcessing:
                 THEN the function should return only a subset of the trait data of the given taxon, containing only
                     data fitting the given filter.
         """
-        eol_page_id = '1143547'
-        predicate_filters = ['http://rs.tdwg.org/dwc/terms/habitat', 'http://eol.org/schema/terms/Present']
-        taxon_trait_data = eol.get_trait_data_for_eol_page_id(eol_page_id, filter_by_predicate=predicate_filters)
+        eol_page_id = "1143547"
+        predicate_filters = [
+            "http://rs.tdwg.org/dwc/terms/habitat",
+            "http://eol.org/schema/terms/Present",
+        ]
+        taxon_trait_data = eol.get_trait_data_for_eol_page_id(
+            eol_page_id, filter_by_predicate=predicate_filters
+        )
 
         assert isinstance(taxon_trait_data, set)
-        assert trait_exists(eol_page_id, 'http://rs.tdwg.org/dwc/terms/habitat',
-                            'http://purl.obolibrary.org/obo/ENVO_00000446', taxon_trait_data)
-        assert trait_exists(eol_page_id, 'http://eol.org/schema/terms/Present', ' http://www.geonames.org/6252001',
-                            taxon_trait_data)
-        assert not trait_exists(eol_page_id, 'http://eol.org/schema/terms/IntroducedRange',
-                                'http://www.geonames.org/6251999', taxon_trait_data)
+        assert trait_exists(
+            eol_page_id,
+            "http://rs.tdwg.org/dwc/terms/habitat",
+            "http://purl.obolibrary.org/obo/ENVO_01000024",
+            taxon_trait_data,
+        )
+        assert trait_exists(
+            eol_page_id,
+            "http://eol.org/schema/terms/Present",
+            "http://www.geonames.org/6252001",
+            taxon_trait_data,
+        )
+        assert not trait_exists(
+            eol_page_id,
+            "http://eol.org/schema/terms/IntroducedRange",
+            "http://www.marineregions.org/mrgid/1914",
+            taxon_trait_data,
+        )
 
-    @pytest.mark.parametrize(['eol_page_id', 'expected_gbif_id'],
-                             [('21828356', '1057764'), ('52717353', '10577931')])
-    def test_get_gbif_id_for_corresponding_eol_id(self, eol, eol_page_id, expected_gbif_id):
+    @pytest.mark.parametrize(
+        ["eol_page_id", "expected_gbif_id"],
+        [("21828356", "1057764"), ("52717353", "10577931")],
+    )
+    def test_get_gbif_id_for_corresponding_eol_id(
+        self, eol, eol_page_id, expected_gbif_id
+    ):
         """
         Feature: The module returns the correct GBIF taxon ID for an EOL page ID.
             Scenario: The user gives an EOL page ID as parameter.
@@ -135,9 +142,15 @@ class TestEolProcessing:
         assert gbif_id == expected_gbif_id
 
 
-def trait_exists(subject: str, predicate: str, obj: str, trait_data: Iterable[Triple]) -> bool:
+def trait_exists(
+    subject: str, predicate: str, obj: str, trait_data: Iterable[Triple]
+) -> bool:
     for trait in trait_data:
-        if trait.subject == subject and trait.predicate == predicate and trait.object == obj:
+        if (
+            trait.subject == subject
+            and trait.predicate == predicate
+            and trait.object == obj
+        ):
             return True
 
     return False

@@ -17,12 +17,11 @@ __copyright__ = "Senckenberg Gesellschaft für Naturforschung, \
 
 import csv
 import pathlib
-from dataclasses import dataclass
 from typing import Optional, Union, List
-from eol import handlers, normalization #nutze STRING für triple ausgabe
-from eol.triple_generator import Triple, TripleGenerator
+
+from eol.handlers import DataHandler, EolTraitCsvHandler
 from eol.normalization import EolTraitCsvNormalizer
-from eol.handlers import EolTraitCsvHandler
+from eol.triple_generator import Triple, TripleGenerator
 
 
 class EncyclopediaOfLifeProcessing:
@@ -41,7 +40,7 @@ class EncyclopediaOfLifeProcessing:
             When `recursive` is True, the returned list contains traits for both the taxon associated with the given
             EOL page ID and all lower hierarchical species recursively.
         """
-        handler = EolTraitCsvHandler('../tests/data/test_eol_traits.csv')
+
         non_normalized_csv_data = next(handler.iterate_data_by_key(key='page_id', value=45258442))
 
         # Normalize the data
