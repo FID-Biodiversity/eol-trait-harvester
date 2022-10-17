@@ -5,7 +5,7 @@ Created on Mon Jul 18 10:54:49 2022
 @author: AHMAD
 """
 import pathlib
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Set
 
 import pandas as pd
 
@@ -43,10 +43,16 @@ class EncyclopediaOfLifeProcessing:
         return self.identifier_converter.to_eol_page_id(gbif_id, DataProvider.Gbif)
 
     def get_trait_data_for_eol_page_id(
-        self, eol_page_id: str, filter_by_predicate: List[str] = None #filter for results in triples. None for no filter
-    ) -> List[Triple]: #function returns list of triple objects
+        self,
+        eol_page_id: str,
+        filter_for_predicates: Set[
+            str
+        ] = None,  # filter for results in triples. None for no filter
+    ) -> List[Triple]:  # function returns list of triple objects
         """Returns a list of Triple objects containing trait data for the given EOL page ID.
         The returned list are only traits directly related to the taxon associated with the given EOL page ID.
+        If given `filter_for_predicates`, all returned Triple objects are restricted to the
+        given predicate URIs. (e.g. {"http://rs.tdwg.org/dwc/terms/habitat", "http://eol.org/schema/terms/Present"}).
         """
 
         triples = set()
@@ -57,15 +63,9 @@ class EncyclopediaOfLifeProcessing:
             normalized_data = self.data_normalizer.normalize(non_normalized_data)
             generated_triples = triple_generator.create_triples(normalized_data)
             triples.update(generated_triples)
-            
-        #filter the generated triples
-        if filter_by_predicate is not None:
-            filter_triples = [x for x in triples
-                              if x.predicate in filter_by_predicate]
-            return deduplicate_triples(filter_triples)
-        
-        else:
-            return deduplicate_triples(triples)
+
+        filtered_triples = filter_triples_for_predicates(triples, filter_for_predicates)
+        return deduplicate_triples(filtered_triples)
 
 
 class IdentifierConverter:
@@ -199,3 +199,18 @@ class IdentifierConverter:
             if len(corresponding_ids) == 1
             else string_representation.split()
         )
+
+
+def filter_triples_for_predicates(
+    triples: Set[Triple], filter_for_predicates: Set[str]
+) -> Set[Triple]:
+    """Returns a list containing only Triples that have a predicate
+    that was given in `filter_for_predicates`.
+    If `filter_for_predicates` is None or an empty list, the original list of Triples is returned.
+    """
+    filtered_triples = triples
+    if filter_for_predicates is not None and filter_for_predicates:
+        filtered_triples = {
+            triple for triple in triples if triple.predicate in filter_for_predicates
+        }
+    return filtered_triples

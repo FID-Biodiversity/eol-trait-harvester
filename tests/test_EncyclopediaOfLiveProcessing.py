@@ -52,7 +52,7 @@ class TestEolProcessing:
         assert len(species_traits) == expected_trait_count
 
     @pytest.mark.parametrize(["eol"], [("csv",), ("api",)], indirect=True)
-    def test_correct_trait_data_is_retrieved(self, eol):
+    def test_correct_trait_data_is_retrieved(self, eol: EncyclopediaOfLifeProcessing):
         """
         Feature: The module returns a set of EolData data class objects (https://docs.python.org/3/library/dataclasses.html)
             with the correct data.
@@ -84,7 +84,7 @@ class TestEolProcessing:
         )
 
     @pytest.mark.parametrize(["eol"], [("csv",), ("api",)], indirect=True)
-    def test_filtering_of_trait_data(self, eol):
+    def test_filtering_of_trait_data(self, eol: EncyclopediaOfLifeProcessing):
         """
         Feature: The module filters the returned trait data by given filters.
             Scenario: The user only wants a subset of the available trait data.
@@ -94,15 +94,16 @@ class TestEolProcessing:
                     data fitting the given filter.
         """
         eol_page_id = "1143547"
-        predicate_filters = [
+        predicate_filters = {
             "http://rs.tdwg.org/dwc/terms/habitat",
             "http://eol.org/schema/terms/Present",
-        ]
+        }
         taxon_trait_data = eol.get_trait_data_for_eol_page_id(
             eol_page_id, filter_by_predicate=predicate_filters
         )
 
-        assert isinstance(taxon_trait_data, set)
+        assert isinstance(taxon_trait_data, list)
+
         assert trait_exists(
             eol_page_id,
             "http://rs.tdwg.org/dwc/terms/habitat",
