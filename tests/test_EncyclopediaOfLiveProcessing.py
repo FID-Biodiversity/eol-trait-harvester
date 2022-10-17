@@ -99,7 +99,7 @@ class TestEolProcessing:
             "http://eol.org/schema/terms/Present",
         }
         taxon_trait_data = eol.get_trait_data_for_eol_page_id(
-            eol_page_id, filter_by_predicate=predicate_filters
+            eol_page_id, filter_for_predicates=predicate_filters
         )
 
         assert isinstance(taxon_trait_data, list)
