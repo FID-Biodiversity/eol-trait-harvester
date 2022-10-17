@@ -43,8 +43,8 @@ class EncyclopediaOfLifeProcessing:
         return self.identifier_converter.to_eol_page_id(gbif_id, DataProvider.Gbif)
 
     def get_trait_data_for_eol_page_id(
-        self, eol_page_id: str, filter_by_predicate: List[str] = None
-    ) -> List[Triple]:
+        self, eol_page_id: str, filter_by_predicate: List[str] = None #filter for results in triples. None for no filter
+    ) -> List[Triple]: #function returns list of triple objects
         """Returns a list of Triple objects containing trait data for the given EOL page ID.
         The returned list are only traits directly related to the taxon associated with the given EOL page ID.
         """
@@ -57,8 +57,15 @@ class EncyclopediaOfLifeProcessing:
             normalized_data = self.data_normalizer.normalize(non_normalized_data)
             generated_triples = triple_generator.create_triples(normalized_data)
             triples.update(generated_triples)
-
-        return deduplicate_triples(triples)
+            
+        #filter the generated triples
+        if filter_by_predicate is not None:
+            filter_triples = [x for x in triples
+                              if x.predicate in filter_by_predicate]
+            return deduplicate_triples(filter_triples)
+        
+        else:
+            return deduplicate_triples(triples)
 
 
 class IdentifierConverter:
