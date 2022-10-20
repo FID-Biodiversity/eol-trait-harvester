@@ -1,6 +1,7 @@
 from copy import copy
-from eol.triple_generator import TripleGenerator
+
 import eol.variables as variables
+from eol.triple_generator import TripleGenerator
 
 
 class Normalizer:
@@ -39,12 +40,12 @@ class EolTraitCsvNormalizer(Normalizer):
         "citation": variables.CITATION_STRING,
         "eol_pk": variables.EOL_RECORD_ID,
         "literal": variables.LITERAL_STRING,
-        "normal_measurement": variables.NORMALMSM_STRING,
-        "normal_units_uri": variables.NORMAL_UNITSURI_STRING,
+        "normal_measurement": variables.NORMAL_MEASURE_STRING,
+        "normal_units_uri": variables.NORMAL_UNITS_URI_STRING,
         "predicate": variables.PREDICATE_STRING,
         "source": variables.SOURCE_URL_STRING,
-        "units_uri": variables.NORMAL_UNITSURI_STRING,
-        "value_uri": variables.VALUEURI_STRING,
+        "units_uri": variables.NORMAL_UNITS_URI_STRING,
+        "value_uri": variables.VALUE_URI_STRING,
         "page_id": variables.PAGE_ID_STRING,
     }
 
@@ -54,16 +55,16 @@ class EolTraitApiNormalizer(Normalizer):
 
     normalized_keys = {
         "t.eol_pk": variables.EOL_RECORD_ID,
-        "obj.uri": variables.VALUEURI_STRING,  # obj.name auch vorhanden
+        "obj.uri": variables.VALUE_URI_STRING,  # obj.name auch vorhanden
         "p.citation": variables.CITATION_STRING,  # citation von PAGE-Knoten
         "p.page_id": variables.PAGE_ID_STRING,
         "pred.uri": variables.PREDICATE_STRING,  # pred.name auch vorhanden
         "t.citation": variables.CITATION_STRING,  # citation von TRAITS-Knoten
         "t.literal": variables.LITERAL_STRING,
-        "t.normal_measurement": variables.NORMALMSM_STRING,
+        "t.normal_measurement": variables.NORMAL_MEASURE_STRING,
         "t.source": variables.SOURCE_URL_STRING,
-        "t.normal_units": variables.NORMAL_UNITSURI_STRING,
-        "units.uri": variables.NORMAL_UNITSURI_STRING,  # units.name auch vorhanden
+        "t.normal_units": variables.NORMAL_UNITS_URI_STRING,
+        "units.uri": variables.NORMAL_UNITS_URI_STRING,  # units.name auch vorhanden
     }
 
 
@@ -83,7 +84,9 @@ def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:
         # Do not overwrite an existing new_key with a not-None value.
         if existing_new_key_value is not None:
             if data[old_key] is not None and data[old_key] != data[new_key]:
-                raise ValueError(f'Multiple keys map to the value {new_key}, but both have valid (not-None) values!')
+                raise ValueError(
+                    f"Multiple keys map to the value {new_key}, but both have valid (not-None) values!"
+                )
         else:
             data[new_key] = data[old_key]
 
@@ -93,7 +96,7 @@ def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:
 if __name__ == "__main__":
     # How to use the DataHandler and Normalizer in conjunction
 
-    from eol.handlers import EolTraitCsvHandler, EolTraitApiHandler
+    from src.eol.handlers import EolTraitCsvHandler, EolTraitApiHandler
     from pprint import pprint
 
     # Get the data from the data source
@@ -125,7 +128,7 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     import os
 
-    load_dotenv("../tests/.env")
+    load_dotenv("../../tests/.env")
 
     eol_api_token = f"JWT {os.environ['EOL_API_TOKEN']}"
     handler = EolTraitApiHandler(eol_api_token)

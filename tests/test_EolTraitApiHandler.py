@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from eol.handlers import EolTraitApiHandler
-from tests.commons import internet_connection_available
+from .commons import internet_connection_available
 
 
 @pytest.mark.skipif(

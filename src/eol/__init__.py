@@ -8,7 +8,6 @@ import pathlib
 from typing import Union, List, Optional, Set
 
 import pandas as pd
-
 from eol.data import read_csv_file, DataProvider
 from eol.handlers import DataHandler
 from eol.normalization import Normalizer

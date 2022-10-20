@@ -306,6 +306,6 @@ def convert_pandas_object_to_dict(pandas_obj) -> dict:
 if __name__ == "__main__":
     from pprint import pprint
 
-    eol = EolTraitCsvHandler("../tests/data/test_eol_traits.csv")
+    eol = EolTraitCsvHandler("../../tests/data/test_eol_traits.csv")
     data = next(eol.iterate_data_by_key(key="page_id", value=45258442))
     pprint(data)

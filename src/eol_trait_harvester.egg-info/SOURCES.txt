@@ -1,0 +1,16 @@
+LICENCE
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+src/eol/__init__.py
+src/eol/data.py
+src/eol/handlers.py
+src/eol/normalization.py
+src/eol/triple_generator.py
+src/eol/variables.py
+src/eol_trait_harvester.egg-info/PKG-INFO
+src/eol_trait_harvester.egg-info/SOURCES.txt
+src/eol_trait_harvester.egg-info/dependency_links.txt
+src/eol_trait_harvester.egg-info/requires.txt
+src/eol_trait_harvester.egg-info/top_level.txt

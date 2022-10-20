@@ -1,8 +1,6 @@
-import json
 from typing import Iterable, Union
 
 import pytest
-
 from eol import EncyclopediaOfLifeProcessing
 from eol.triple_generator import Triple
 

@@ -23,7 +23,16 @@ class Triple:
     citation_text: Optional[str] = None
 
     def __hash__(self):
-        return hash((self.subject, self.predicate, self.object, self.unit, self.source_url, self.citation_text))
+        return hash(
+            (
+                self.subject,
+                self.predicate,
+                self.object,
+                self.unit,
+                self.source_url,
+                self.citation_text,
+            )
+        )
 
 
 class TripleGenerator:
@@ -41,9 +50,7 @@ class Objectclass_objuri:
     if object information is in obj.uri and obj.name"""
 
     def create_triple(self, triple_data, triples):
-        obj_value: str = triple_data.get(
-            variables.VALUEURI_STRING
-        )
+        obj_value: str = triple_data.get(variables.VALUE_URI_STRING)
         if obj_value is not None:
             triple = create_triple(triple_data, obj_value)
             triples.append(triple)
@@ -71,8 +78,8 @@ class Objectclass_meas_units:
     if object information is in t.normal_measurement, units.uri, units.name"""
 
     def create_triple(self, triple_data, triples):
-        quantity = triple_data.get(variables.NORMALMSM_STRING)
-        quantity_unit = triple_data.get(variables.NORMAL_UNITSURI_STRING)
+        quantity = triple_data.get(variables.NORMAL_MEASURE_STRING)
+        quantity_unit = triple_data.get(variables.NORMAL_UNITS_URI_STRING)
         if quantity is not None and quantity_unit is not None:
             # Numeric values should be numeric, not strings
             if is_string_float_or_integer(quantity):
@@ -119,7 +126,7 @@ def deduplicate_triples(triples: Iterable[Triple]) -> List[Triple]:
 
 
 def is_string_float_or_integer(string: str) -> float:
-    """ Checks if a given string is an integer or a float number."""
+    """Checks if a given string is an integer or a float number."""
     if isinstance(string, str):
         return string.replace(".", "", 1).isnumeric()
     else:
