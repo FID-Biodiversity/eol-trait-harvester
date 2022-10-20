@@ -4,14 +4,10 @@ Created on Mon Sep 19 10:34:39 2022
 
 @author: TAHIR
 """
-from typing import Optional
+from dataclasses import dataclass
+from typing import Optional, Union, List, Iterable
 
 import eol.variables as variables
-from dataclasses import dataclass
-
-# chain of command, design of command
-# chain of responsibility
-# one class per object-combination: 3 known object-combinations
 
 
 @dataclass
@@ -20,13 +16,14 @@ class Triple:
 
     subject: str
     predicate: str
-    object: str
+    object: Union[str, int]
+    eol_record_id: str
     unit: Optional[str] = None
     source_url: Optional[str] = None
     citation_text: Optional[str] = None
-    
+
     def __hash__(self):
-        return hash((self.subject, self.predicate, self.object))
+        return hash((self.subject, self.predicate, self.object, self.unit, self.source_url, self.citation_text))
 
 
 class TripleGenerator:
@@ -37,14 +34,16 @@ class TripleGenerator:
         triples = []
         triples = obj.create_triple(triple_data, triples)
         return deduplicate_triples(triples)
-    
+
 
 class Objectclass_objuri:
     """underclass TripleGenerator:
     if object information is in obj.uri and obj.name"""
 
     def create_triple(self, triple_data, triples):
-        obj_value = triple_data.get(variables.VALUEURI_STRING)#gibt None zurück wenn kein Wert drin ist
+        obj_value: str = triple_data.get(
+            variables.VALUEURI_STRING
+        )
         if obj_value is not None:
             triple = create_triple(triple_data, obj_value)
             triples.append(triple)
@@ -75,37 +74,53 @@ class Objectclass_meas_units:
         quantity = triple_data.get(variables.NORMALMSM_STRING)
         quantity_unit = triple_data.get(variables.NORMAL_UNITSURI_STRING)
         if quantity is not None and quantity_unit is not None:
+            # Numeric values should be numeric, not strings
+            if is_string_float_or_integer(quantity):
+                quantity = float(quantity)
+
             triple = create_triple(triple_data, quantity, quantity_unit)
             triples.append(triple)
-        
+
         obj = Objectclass_source()
         return obj.create_triple(triple_data, triples)
-    
+
+
 class Objectclass_source:
     """underclass TripleGenerator:
-        if source is given"""
-        
+    if source is given"""
+
     def create_triple(self, triple_data, triples):
-        """ takes source if information is given and adds to the triples """
+        """takes source if information is given and adds to the triples"""
         source_url = triple_data.get(variables.SOURCE_URL_STRING)
         citation_text = triple_data.get(variables.CITATION_STRING)
         if source_url is not None or citation_text is not None:
             for triple in triples:
                 triple.source_url = source_url
                 triple.citation_text = citation_text
-        return triples # gibt komplette triples-Liste zurück, chain of responsibility zu Ende
-            
-        
+        return triples  # gibt komplette triples-Liste zurück, chain of responsibility zu Ende
 
 
-def create_triple(triple_data: dict, obj_value: str, unit: str = None):
+def create_triple(triple_data: dict, obj_value: [str, int, float], unit: str = None):
     subject = triple_data[variables.PAGE_ID_STRING]
     predicate = triple_data[variables.PREDICATE_STRING]
-    return Triple(str(subject), predicate, obj_value, unit=unit)
+    eol_record_id = triple_data[variables.EOL_RECORD_ID]
+    return Triple(
+        str(subject), predicate, obj_value, eol_record_id=eol_record_id, unit=unit
+    )
 
 
-def deduplicate_triples(triples):
-    """ data from list -> set -> sorted list """
+def deduplicate_triples(triples: Iterable[Triple]) -> List[Triple]:
+    """data from list -> set -> sorted list"""
     triple_set = set(triples)  # data from list -> set (unsorted)
-    return sorted(triple_set, key=lambda triple: (triple.subject, triple.predicate))  # way of sorting
+    return sorted(
+        triple_set, key=lambda triple: (triple.subject, triple.predicate)
+    )  # way of sorting
     # lambda takes triple and returns the triple's subject
+
+
+def is_string_float_or_integer(string: str) -> float:
+    """ Checks if a given string is an integer or a float number."""
+    if isinstance(string, str):
+        return string.replace(".", "", 1).isnumeric()
+    else:
+        return isinstance(string, (int, float))

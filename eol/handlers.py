@@ -96,7 +96,7 @@ class EolTraitCsvHandler:
 class EolTraitApiHandler:
     """Takes care of reading and converting data from the EOL Cypher Web-API.
     This is a DataHandler class and obeys the DataHandler interface.
-    
+
     "columns": [
             "r.resource_id",
             "t.eol_pk",
@@ -200,7 +200,7 @@ class EolTraitApiHandler:
             number_of_returned_entries += limit_count
 
     def read_api_with_parameters(self, url: str, **kwargs):
-        return self.session.get(url, params=kwargs)
+        return self.session.post(url, params=kwargs)
 
     def compose_cypher_url(self, cypher_query: str) -> str:
         return f"https://eol.org/service/cypher?query={cypher_query.strip()}"
@@ -233,16 +233,38 @@ class EolTraitApiHandler:
     ) -> str:
         values = [f'"{v}"' if str(v).startswith("http") else v for v in values]
 
+        # The ORDER BY command is mandatory to make pagination predictable.
+        # In Neo4J, the return order may (!) be continuous, but it seems to depend on the data.
+        order_by_variable = "t.eol_pk"
+        return_variables = [
+            "obj.name",
+            "obj.uri",
+            "p.citation",
+            "p.page_id",
+            "pred.name",
+            "pred.uri",
+            "r.resource_id",
+            "t.citation",
+            "t.eol_pk",
+            "t.literal",
+            "t.normal_measurement",
+            "t.normal_units",
+            "t.object_page_id",
+            "t.resource_ok",
+            "t.scientific_name",
+            "t.source",
+            "units.name",
+            "units.uri",
+        ]
+
         return f"""MATCH (t:Trait)<-[:trait]-(p:Page),
     (t)-[:supplier]->(r:Resource),
     (t)-[:predicate]->(pred:Term)
     WHERE {' AND '.join(f'{key} = {value}' for key, value in zip(keys, values))}
     OPTIONAL MATCH (t)-[:object_term]->(obj:Term)
     OPTIONAL MATCH (t)-[:normal_units_term]->(units:Term)
-    RETURN r.resource_id, t.eol_pk, t.resource_ok, t.source,
-    p.page_id, t.scientific_name, pred.uri, pred.name,
-    t.object_page_id, obj.uri, obj.name, t.normal_measurement,
-    units.uri, units.name, t.normal_units, t.literal
+    RETURN {', '.join(return_variables)}
+    ORDER BY {order_by_variable}
     LIMIT {query_limit}"""
 
 

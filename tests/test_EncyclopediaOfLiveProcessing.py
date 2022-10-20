@@ -1,4 +1,5 @@
-from typing import Iterable
+import json
+from typing import Iterable, Union
 
 import pytest
 
@@ -36,7 +37,7 @@ class TestEolProcessing:
         assert len(species_traits) == 0
 
     @pytest.mark.parametrize(
-        ["eol", "expected_trait_count"], [("csv", 7), ("api", 89)], indirect=["eol"]
+        ["eol", "expected_trait_count"], [("csv", 7), ("api", 80)], indirect=["eol"]
     )
     def test_non_recursive_data_retrieval(
         self, eol: EncyclopediaOfLifeProcessing, expected_trait_count
@@ -66,8 +67,8 @@ class TestEolProcessing:
         assert isinstance(taxon_trait_data, list)
         assert trait_exists(
             eol_page_id,
-            "http://rs.tdwg.org/dwc/terms/habitat",
-            "http://purl.obolibrary.org/obo/ENVO_01000024",
+            "http://purl.obolibrary.org/obo/TO_0000540",
+            0.003389,
             taxon_trait_data,
         )
         assert trait_exists(
@@ -79,7 +80,7 @@ class TestEolProcessing:
         assert trait_exists(
             eol_page_id,
             "http://eol.org/schema/terms/IntroducedRange",
-            "http://www.marineregions.org/mrgid/1914",
+            "http://www.wikidata.org/entity/Q578170",
             taxon_trait_data,
         )
 
@@ -103,25 +104,8 @@ class TestEolProcessing:
         )
 
         assert isinstance(taxon_trait_data, list)
-
-        assert trait_exists(
-            eol_page_id,
-            "http://rs.tdwg.org/dwc/terms/habitat",
-            "http://purl.obolibrary.org/obo/ENVO_01000024",
-            taxon_trait_data,
-        )
-        assert trait_exists(
-            eol_page_id,
-            "http://eol.org/schema/terms/Present",
-            "http://www.geonames.org/6252001",
-            taxon_trait_data,
-        )
-        assert not trait_exists(
-            eol_page_id,
-            "http://eol.org/schema/terms/IntroducedRange",
-            "http://www.marineregions.org/mrgid/1914",
-            taxon_trait_data,
-        )
+        assert len(taxon_trait_data) > 0
+        assert all(triple.predicate in predicate_filters for triple in taxon_trait_data)
 
     @pytest.mark.parametrize(
         ["eol_page_id", "expected_gbif_id"],
@@ -157,7 +141,7 @@ class TestEolProcessing:
 
 
 def trait_exists(
-    subject: str, predicate: str, obj: str, trait_data: Iterable[Triple]
+    subject: str, predicate: str, obj: Union[str, float], trait_data: Iterable[Triple]
 ) -> bool:
     for trait in trait_data:
         if (
