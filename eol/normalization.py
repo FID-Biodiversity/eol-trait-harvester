@@ -50,8 +50,17 @@ class EolTraitCsvNormalizer(Normalizer):
 
 class EolTraitApiNormalizer(Normalizer):
     """ This class normalizes the data provided by the EolTraitApiHandler. """
-    pass
-    #eol.org variablen 
+    normalized_keys = {'p.page_id': variables.PAGE_ID_STRING,
+                       'pred.uri': variables.PREDICATE_STRING, #pred.name auch vorhanden
+                       'obj.uri': variables.VALUEURI_STRING, #obj.name auch vorhanden
+                       't.literal': variables.LITERAL_STRING,
+                       't.normal_measurement': variables.NORMALMSM_STRING,
+                       'normal_units_uri': variables.NORMAL_UNITSURI_STRING,
+                       'units.uri': variables.NORMAL_UNITSURI_STRING, #units.name auch vorhanden
+                       't.source': variables.SOURCE_STRING,
+                       'p.citation': variables.CITATION_STRING, #citation von PAGE-Knoten
+                       't.citation': variables.CITATION_STRING #citation von TRAITS-Knoten
+                       }
 
 
 def replace_key_by_new_key(old_key: str, new_key: str, data: dict) -> None:

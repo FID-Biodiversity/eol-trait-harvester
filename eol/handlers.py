@@ -96,6 +96,25 @@ class EolTraitCsvHandler:
 class EolTraitApiHandler:
     """Takes care of reading and converting data from the EOL Cypher Web-API.
     This is a DataHandler class and obeys the DataHandler interface.
+    
+    "columns": [
+            "r.resource_id",
+            "t.eol_pk",
+            "t.resource_ok",
+            "t.source",
+            "p.page_id",
+            "t.scientific_name",
+            "pred.uri",
+            "pred.name",
+            "t.object_page_id",
+            "obj.uri",
+            "obj.name",
+            "t.normal_measurement",
+            "units.uri",
+            "units.name",
+            "t.normal_units",
+            "t.literal"
+    ]
     """
 
     parameter_name_normalizations = {"page_id": "p.page_id"}
