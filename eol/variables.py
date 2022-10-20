@@ -11,3 +11,5 @@ VALUEURI_STRING = 'value_uri' #objclass1
 LITERAL_STRING = 'literal'
 NORMALMSM_STRING = 'normal_measurement'
 NORMAL_UNITSURI_STRING = 'units_uri'
+SOURCE_URL_STRING = 'source'
+CITATION_STRING = 'citation'

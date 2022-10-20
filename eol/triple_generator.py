@@ -22,7 +22,8 @@ class Triple:
     predicate: str
     object: str
     unit: Optional[str] = None
-    # TODO: Add source incl. tests
+    source_url: Optional[str] = None
+    citation_text: Optional[str] = None
     
     def __hash__(self):
         return hash((self.subject, self.predicate, self.object))
@@ -76,7 +77,25 @@ class Objectclass_meas_units:
         if quantity is not None and quantity_unit is not None:
             triple = create_triple(triple_data, quantity, quantity_unit)
             triples.append(triple)
-        return triples  # gibt komplette triples-Liste zurück, chain of responsibility zu Ende
+        
+        obj = Objectclass_source()
+        return obj.create_triple(triple_data, triples)
+    
+class Objectclass_source:
+    """underclass TripleGenerator:
+        if source is given"""
+        
+    def create_triple(self, triple_data, triples):
+        """ takes source if information is given and adds to the triples """
+        source_url = triple_data.get(variables.SOURCE_URL_STRING)
+        citation_text = triple_data.get(variables.CITATION_STRING)
+        if source_url is not None or citation_text is not None:
+            for triple in triples:
+                triple.source_url = source_url
+                triple.citation_text = citation_text
+        return triples # gibt komplette triples-Liste zurück, chain of responsibility zu Ende
+            
+        
 
 
 def create_triple(triple_data: dict, obj_value: str, unit: str = None):

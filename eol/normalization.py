@@ -40,7 +40,9 @@ class EolTraitCsvNormalizer(Normalizer):
                        'literal': variables.LITERAL_STRING,
                        'normal_measurement': variables.NORMALMSM_STRING,
                        'normal_units_uri': variables.NORMAL_UNITSURI_STRING,
-                       'units_uri': variables.NORMAL_UNITSURI_STRING
+                       'units_uri': variables.NORMAL_UNITSURI_STRING,
+                       'source': variables.SOURCE_STRING,
+                       'citation': variables.CITATION_STRING
                        }
                         #normal_units_uri, normal_units, units_uri, units #nur verwendbare Daten
                         #normal_units_uri, units_uri
