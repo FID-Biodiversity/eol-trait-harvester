@@ -113,7 +113,7 @@ eol = EncyclopediaOfLifeProcessing(
 #   * Integrated Taxonomic Information System (ITIS)
 #   * IUCN
 #   * National Center for Biotechnology Information (NCBI)
-#   * World Register of Mrine Species (WoRMS)
+#   * World Register of Marine Species (WoRMS)
 #
 # Restricting the data providers before the first call to the identifier converter,
 # makes the first call faster, since less data has to be processed. However,
@@ -137,7 +137,9 @@ print(eol_page_id)
 
 # When converting from EOL page ID and no data provider is given,
 # a list of corresponding IDs is returned.
-corresponding_ids = eol.identifier_converter.from_eol_page_id("21828356")
+corresponding_ids = eol.identifier_converter.from_eol_page_id("46552319")
+print(corresponding_ids)
+# ['2269258', '117870']
 ```
 
 # Tests
