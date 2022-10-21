@@ -105,6 +105,24 @@ eol = EncyclopediaOfLifeProcessing(
     handler, normalizer, eol_provider_mapping_csv_file_path
 )
 
+# If necessary, you can restrict or extend the data providers considered
+# in the identifier conversion. Per default only GBIF is set!
+# Implemented data providers are (in alphabetical order):
+#   * Frost's 2018 Amphibian Species of the World
+#   * GBIF
+#   * Integrated Taxonomic Information System (ITIS)
+#   * IUCN
+#   * National Center for Biotechnology Information (NCBI)
+#   * World Register of Mrine Species (WoRMS)
+#
+# Restricting the data providers before the first call to the identifier converter,
+# makes the first call faster, since less data has to be processed. However,
+# if a data provider is not given as relevant data provider, no ID for this
+# data provider will be returned!
+#
+# To add only WoRMS (in addition to GBIF), you can write:
+eol.identifier_converter.relevant_data_providers.append(DataProvider.WoRMS)
+
 # Convert to GBIF Taxon ID
 gbif_taxon_id = eol.identifier_converter.from_eol_page_id(
             "21828356", DataProvider.Gbif)
@@ -116,13 +134,17 @@ eol_page_id = eol.identifier_converter.to_eol_page_id(
     "1057764", DataProvider.Gbif)
 print(eol_page_id)
 # 21828356
+
+# When converting from EOL page ID and no data provider is given,
+# a list of corresponding IDs is returned.
+corresponding_ids = eol.identifier_converter.from_eol_page_id("21828356")
 ```
 
 # Tests
 For running tests, you need to install the test dependencies while in the virtual environment:
 
 ```shell
-pip install -e .[tests]
+pip install -e .[dev]
 ```
 
 For running test, you need to have a `.env` file in the `tests` folder. The content should be like this:

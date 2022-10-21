@@ -1,7 +1,7 @@
 from typing import Iterable, Union
 
 import pytest
-from eol import EncyclopediaOfLifeProcessing
+from eol import EncyclopediaOfLifeProcessing, IdentifierConverterNotSetError
 from eol.triple_generator import Triple
 
 
@@ -117,9 +117,6 @@ class TestEolProcessing:
             Scenario: The user gives an EOL page ID as parameter.
                 GIVEN a valid EOL page ID is given as parameter.
                 THEN the function should return a string of the corresponding GBIF ID.
-
-        NOTE! This feature should be easily expandable. So, when I want to write a similar function for another
-            data provider, the implementation should make this easy.
         """
         gbif_id = eol_with_provider_ids.get_gbif_id_for_eol_page_id(eol_page_id)
         assert gbif_id == expected_gbif_id
@@ -136,6 +133,24 @@ class TestEolProcessing:
         """
         eol_page_id = eol_with_provider_ids.get_eol_page_id_from_gbif_id(gbif_id)
         assert eol_page_id == expected_eol_page_id
+
+    def test_corresponding_id_does_not_exist(self, eol_with_provider_ids):
+        """
+        Feature: If a given EOL page ID has no correspondence in the other data provider,
+            return None.
+        """
+        eol_page_id = eol_with_provider_ids.identifier_converter.from_eol_page_id(
+            "46559130"
+        )
+        assert eol_page_id is None
+
+    def test_identifier_converter_is_called_but_not_set(self, eol):
+        """
+        Feature: A IdentifierConverterNotSetError is raised, if the an ID conversion is requested
+            but no CSV file with the mapping was provided.
+        """
+        with pytest.raises(IdentifierConverterNotSetError):
+            eol.get_gbif_id_for_eol_page_id("46559130")
 
 
 def trait_exists(

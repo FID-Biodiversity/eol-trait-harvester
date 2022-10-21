@@ -15,14 +15,14 @@ dependencies = [
     "requests~=2.0",
     "pandas~=1.0"
 ]
-version = ["1.0.0"]
+version = "1.0.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 exclude = ["tests*"]
 
 [project.optional-dependencies]
-tests = [
+dev = [
     "pytest~=7.1",
     "black~=22.0",
     "python-dotenv~=0.20"
