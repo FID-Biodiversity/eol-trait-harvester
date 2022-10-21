@@ -1,5 +1,6 @@
 import os
 import pathlib
+from typing import Optional
 
 import pytest
 from dotenv import load_dotenv
@@ -25,11 +26,11 @@ def provider_ids_csv_file_path(resource_directory) -> pathlib.Path:
 
 
 @pytest.fixture(scope="session")
-def eol_api_credentials(current_directory) -> str:
+def eol_api_credentials(current_directory) -> Optional[str]:
     load_dotenv()
 
-    token = os.environ["EOL_API_TOKEN"]
-    return f"JWT {token}"
+    token = os.environ.get("EOL_API_TOKEN")
+    return f"JWT {token}" if token is not None else None
 
 
 @pytest.fixture

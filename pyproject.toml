@@ -17,6 +17,10 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*"]
+
 [project.optional-dependencies]
 tests = [
     "pytest~=7.1",

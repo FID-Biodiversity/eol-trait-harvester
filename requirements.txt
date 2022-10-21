@@ -1,4 +1,0 @@
-pandas
-requests
-pytest
-python-dotenv~=0.20
