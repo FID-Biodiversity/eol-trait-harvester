@@ -40,23 +40,19 @@ def eol_trait_csv_file_path() -> str:
 
 
 @pytest.fixture
-def eol_with_csv_handler(
-    eol_trait_csv_file_path, provider_ids_csv_file_path
-) -> EncyclopediaOfLifeProcessing:
+def eol_with_csv_handler(eol_trait_csv_file_path) -> EncyclopediaOfLifeProcessing:
     handler = EolTraitCsvHandler(eol_trait_csv_file_path)
     normalizer = EolTraitCsvNormalizer()
 
-    return EncyclopediaOfLifeProcessing(handler, normalizer, provider_ids_csv_file_path)
+    return EncyclopediaOfLifeProcessing(handler, normalizer)
 
 
 @pytest.fixture
-def eol_with_api_handler(
-    eol_api_credentials, provider_ids_csv_file_path
-) -> EncyclopediaOfLifeProcessing:
+def eol_with_api_handler(eol_api_credentials) -> EncyclopediaOfLifeProcessing:
     handler = EolTraitApiHandler(eol_api_credentials)
     normalizer = EolTraitApiNormalizer()
 
-    return EncyclopediaOfLifeProcessing(handler, normalizer, provider_ids_csv_file_path)
+    return EncyclopediaOfLifeProcessing(handler, normalizer)
 
 
 @pytest.fixture
@@ -69,3 +65,13 @@ def eol(request, eol_with_api_handler, eol_with_csv_handler):
     except AttributeError:
         # CSV trait handler is default
         return eol_with_csv_handler
+
+
+@pytest.fixture
+def eol_with_provider_ids(
+    eol_trait_csv_file_path, provider_ids_csv_file_path
+) -> EncyclopediaOfLifeProcessing:
+    handler = EolTraitCsvHandler(eol_trait_csv_file_path)
+    normalizer = EolTraitCsvNormalizer()
+
+    return EncyclopediaOfLifeProcessing(handler, normalizer, provider_ids_csv_file_path)

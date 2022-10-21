@@ -110,7 +110,7 @@ class TestEolProcessing:
         [("21828356", "1057764"), ("52717353", "10577931")],
     )
     def test_get_gbif_id_for_corresponding_eol_id(
-        self, eol, eol_page_id, expected_gbif_id
+        self, eol_with_provider_ids, eol_page_id, expected_gbif_id
     ):
         """
         Feature: The module returns the correct GBIF taxon ID for an EOL page ID.
@@ -121,7 +121,7 @@ class TestEolProcessing:
         NOTE! This feature should be easily expandable. So, when I want to write a similar function for another
             data provider, the implementation should make this easy.
         """
-        gbif_id = eol.get_gbif_id_for_eol_page_id(eol_page_id)
+        gbif_id = eol_with_provider_ids.get_gbif_id_for_eol_page_id(eol_page_id)
         assert gbif_id == expected_gbif_id
 
     @pytest.mark.parametrize(
@@ -129,12 +129,12 @@ class TestEolProcessing:
         [("1057764", "21828356"), ("10577931", "52717353")],
     )
     def test_get_eol_id_for_corresponding_gbif_id(
-        self, eol, gbif_id, expected_eol_page_id
+        self, eol_with_provider_ids, gbif_id, expected_eol_page_id
     ):
         """
         Feature: The module returns the correct EOL page ID for a given GBIF ID.
         """
-        eol_page_id = eol.get_eol_page_id_from_gbif_id(gbif_id)
+        eol_page_id = eol_with_provider_ids.get_eol_page_id_from_gbif_id(gbif_id)
         assert eol_page_id == expected_eol_page_id
 
 

@@ -23,7 +23,7 @@ class EncyclopediaOfLifeProcessing:
         self,
         data_handler: DataHandler,
         data_normalizer: Normalizer,
-        data_provider_mapping_csv_file_path: pathlib.Path,
+        data_provider_mapping_csv_file_path: pathlib.Path = None,
     ):
         self.data_handler = data_handler
         self.data_normalizer = data_normalizer

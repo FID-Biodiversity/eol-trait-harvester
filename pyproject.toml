@@ -15,7 +15,7 @@ dependencies = [
     "requests~=2.0",
     "pandas~=1.0"
 ]
-dynamic = ["version"]
+version = ["1.0.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
