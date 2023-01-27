@@ -136,8 +136,8 @@ class TestEolProcessing:
 
     def test_corresponding_id_does_not_exist(self, eol_with_provider_ids):
         """
-        Feature: If a given EOL page ID has no correspondence in the other data provider,
-            return None.
+        Feature: If a given EOL page ID has no correspondence in the other
+            data provider, return None.
         """
         eol_page_id = eol_with_provider_ids.identifier_converter.from_eol_page_id(
             "46559130"
@@ -146,8 +146,8 @@ class TestEolProcessing:
 
     def test_identifier_converter_is_called_but_not_set(self, eol):
         """
-        Feature: A IdentifierConverterNotSetError is raised, if the an ID conversion is requested
-            but no CSV file with the mapping was provided.
+        Feature: A IdentifierConverterNotSetError is raised, if the an ID conversion
+            is requested but no CSV file with the mapping was provided.
         """
         with pytest.raises(IdentifierConverterNotSetError):
             eol.get_gbif_id_for_eol_page_id("46559130")

@@ -1,7 +1,9 @@
+import logging
 import pathlib
-from typing import Union, List, Optional
+from typing import List, Optional, Union
 
 import pandas as pd
+
 from eol.data import DataProvider, read_csv_file
 
 
@@ -41,6 +43,8 @@ class IdentifierConverter:
         self._relevant_data_providers = relevant_data_providers
         self._csv_dataframe = None
 
+        self.logger = logging.getLogger(__name__)
+
     @property
     def relevant_data_providers(self) -> List[DataProvider]:
         """Returns the list of the relevant data providers."""
@@ -48,7 +52,9 @@ class IdentifierConverter:
 
     @relevant_data_providers.setter
     def relevant_data_providers(self, data_providers: List[DataProvider]) -> None:
-        """Takes the update to the lists and converts the DataProviders into their IDs."""
+        """Takes the update to the lists and converts the DataProviders into their
+        IDs.
+        """
         self._relevant_data_providers = data_providers
 
         # You have to update the data_frame with the new data providers
@@ -71,14 +77,14 @@ class IdentifierConverter:
     ) -> Optional[Union[List[str], str]]:
         """Returns the corresponding EOL page ID for the given provider ID.
         This method should return None, if no corresponding EOL page ID can be found.
-        If the outcome is ambiguous (because the same `identifier` exists in multiple data provider
-        namespaces) and no `data_provider` is given for disambiguation, a list of all corresponding
-        EOL page IDs is returned.
+        If the outcome is ambiguous (because the same `identifier` exists in multiple
+        data provider namespaces) and no `data_provider` is given for disambiguation,
+        a list of all corresponding EOL page IDs is returned.
         """
         return self._access_dataframe_for_id(
             data_provider=data_provider,
             id_provider_column_name=self.CORRESPONDING_ID_ROW_NAME,
-            search_value=str(identifier),
+            search_value=identifier,
             column_to_return=self.EOL_PAGE_ID_ROW_NAME,
         )
 
@@ -87,9 +93,9 @@ class IdentifierConverter:
     ) -> Optional[Union[List[str], str]]:
         """Returns the corresponding ID in the provider data for the given EOL page ID.
         This method should return None, if no corresponding ID can be found.
-        If the outcome is ambiguous (because there are multiple relevant data providers given that have
-        corresponding IDs) and no `data_provider` is given for disambiguation, a list of all corresponding
-        IDs is returned.
+        If the outcome is ambiguous (because there are multiple relevant data providers
+        given that have corresponding IDs) and no `data_provider` is given for
+        disambiguation, a list of all corresponding IDs is returned.
         """
         return self._access_dataframe_for_id(
             data_provider=data_provider,
@@ -103,12 +109,14 @@ class IdentifierConverter:
         column_index = (column_number_of_provider_ids,) * len(
             self.relevant_data_providers
         )
+        self.logger.info("Reading EOL data provider mapping...")
         self._csv_dataframe = read_csv_file(
             self.provider_csv_file_path,
             filter_criteria=tuple(self.relevant_data_provider_ids),
             column_index=column_index,
             dtypes=self.CSV_DTYPES,
         )
+        self.logger.info("Done!")
 
     def _access_dataframe_for_id(
         self,
