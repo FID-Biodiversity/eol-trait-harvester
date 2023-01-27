@@ -15,7 +15,7 @@ dependencies = [
     "requests~=2.0",
     "pandas~=1.0"
 ]
-version = "1.0.0"
+version = "1.0.1"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -26,5 +26,7 @@ dev = [
     "pytest~=7.1",
     "black",
     "python-dotenv~=0.20",
-    "isort"
+    "isort",
+    "pylint",
+    "mypy"
 ]
