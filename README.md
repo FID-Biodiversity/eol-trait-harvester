@@ -1,4 +1,4 @@
-This library harvests trait data from the [Encyclopedia of Live](https://eol.org). It can handle both the [EOL All traits CSV file](https://opendata.eol.org/dataset/all-trait-data-large) and the EOL API.  We recommend going with the API, since it seems more complete and is up-to-date. 
+This library harvests trait data from the [Encyclopedia of Live](https://eol.org). It can handle both the [EOL All traits CSV file](https://opendata.eol.org/dataset/all-trait-data-large) and the EOL API.  We recommend going with the API, since it seems more complete and is up-to-date.
 
 The harvester returns Triple objects that hold triple statements (subject, prediate, object) and additionally references to source URLs or citations.
 
@@ -38,19 +38,19 @@ print(len(species_traits))
 
 print(species_traits[0])
 # Triple(
-#   subject='311544', 
-#   predicate='http://eol.org/schema/terms/AETinRange', 
-#   object=407.56, 
-#   eol_record_id='R261-PK213792796', 
-#   unit='http://eol.org/schema/terms/millimeterspermonth', 
-#   source_url='http://esapubs.org/archive/ecol/E090/184/', 
+#   subject='311544',
+#   predicate='http://eol.org/schema/terms/AETinRange',
+#   object=407.56,
+#   eol_record_id='R261-PK213792796',
+#   unit='http://eol.org/schema/terms/millimeterspermonth',
+#   source_url='http://esapubs.org/archive/ecol/E090/184/',
 #   citation_text="Kate E. Jones, Jon Bielby, Marcel Cardillo, Susanne A. Fritz, Justin O'Dell, C. David L. Orme, Kamran Safi, Wes Sechrest, Elizabeth H. Boakes, Chris Carbone, Christina Connolly, Michael J. Cutts, Janine K. Foster, Richard Grenyer, Michael Habib, Christopher A. Plaster, Samantha A. Price, Elizabeth A. Rigby, Janna Rist, Amber Teacher, Olaf R. P. Bininda-Emonds, John L. Gittleman, Georgina M. Mace, and Andy Purvis. 2009. PanTHERIA: a species-level database of life history, ecology, and geography of extant and recently extinct mammals. Ecology 90:2648."
 #)
 ```
 You see that numerical values in the `object` of the created `Triple` are formatted automatically into `float` numbers. Strings (e.g. URIs) will be returned as strings (`str`).
 
 ## Harvesting the EOL All trait CSV file
-A major advantage that comes with downloading the [All EOL Traits CSV file](https://opendata.eol.org/dataset/all-trait-data-large) and process it with the `eol-trait-harvester` is that, although the file is  huge (6+ GB), the data retrieval is fast. The `eol-trait-harverster` is optimized to not digest the whole file at once, but iteratively and hence should not kill a modern laptop. 
+A major advantage that comes with downloading the [All EOL Traits CSV file](https://opendata.eol.org/dataset/all-trait-data-large) and process it with the `eol-trait-harvester` is that, although the file is  huge (6+ GB), the data retrieval is fast. The `eol-trait-harverster` is optimized to not digest the whole file at once, but iteratively and hence should not kill a modern laptop.
 
 The downside of using the CSV file is that not all traits are in there, at least within the project group, we had this impression. Also you have a long booting phase when the CSV file is digested by the harvester. But this is done only once at the beginning.
 
@@ -73,12 +73,12 @@ print(len(species_traits))
 
 print(species_traits[0])
 # Triple(
-#   subject='311544', 
-#   predicate='http://eol.org/schema/terms/AETinRange', 
-#   object=407.56, 
-#   eol_record_id='R261-PK213792796', 
-#   unit='http://eol.org/schema/terms/millimeterspermonth', 
-#   source_url='http://esapubs.org/archive/ecol/E090/184/', 
+#   subject='311544',
+#   predicate='http://eol.org/schema/terms/AETinRange',
+#   object=407.56,
+#   eol_record_id='R261-PK213792796',
+#   unit='http://eol.org/schema/terms/millimeterspermonth',
+#   source_url='http://esapubs.org/archive/ecol/E090/184/',
 #   citation_text="Kate E. Jones, Jon Bielby, Marcel Cardillo, Susanne A. Fritz, Justin O'Dell, C. David L. Orme, Kamran Safi, Wes Sechrest, Elizabeth H. Boakes, Chris Carbone, Christina Connolly, Michael J. Cutts, Janine K. Foster, Richard Grenyer, Michael Habib, Christopher A. Plaster, Samantha A. Price, Elizabeth A. Rigby, Janna Rist, Amber Teacher, Olaf R. P. Bininda-Emonds, John L. Gittleman, Georgina M. Mace, and Andy Purvis. 2009. PanTHERIA: a species-level database of life history, ecology, and geography of extant and recently extinct mammals. Ecology 90:2648."
 #)
 ```
@@ -134,6 +134,12 @@ eol_page_id = eol.identifier_converter.to_eol_page_id(
     "1057764", DataProvider.Gbif)
 print(eol_page_id)
 # 21828356
+
+# You can also provide a list of data provider IDs. This speeds up the conversion of many IDs massively.
+eol_page_id = eol.identifier_converter.to_eol_page_id(
+    ["1057764"], DataProvider.Gbif)
+print(eol_page_id)
+# [21828356]
 
 # When converting from EOL page ID and no data provider is given,
 # a list of corresponding IDs is returned.
