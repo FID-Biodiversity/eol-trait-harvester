@@ -25,6 +25,8 @@ exclude = ["tests*"]
 dev = [
     "pytest~=7.1",
     "python-dotenv~=0.20",
+    "pytest-cov",
+    "tox",
 
     "pre-commit",
     "black",
