@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import pathlib
 from typing import List, Optional, Union
@@ -18,6 +20,11 @@ class IdentifierConverter:
         CORRESPONDING_ID_ROW_NAME: "str",
         EOL_PAGE_ID_ROW_NAME: "int",
     }
+    RELEVANT_COLUMNS = [
+        CORRESPONDING_ID_ROW_NAME,
+        EOL_PAGE_ID_ROW_NAME,
+        DATA_PROVIDER_ID_ROW_NAME,
+    ]
 
     def __init__(
         self,
@@ -73,13 +80,19 @@ class IdentifierConverter:
         return self._csv_dataframe
 
     def to_eol_page_id(
-        self, identifier: Union[str, int], data_provider: DataProvider = None
+        self, identifier: Union[str, int, list[Union[str, int]]], data_provider: DataProvider = None
     ) -> Optional[Union[List[str], str]]:
         """Returns the corresponding EOL page ID for the given provider ID.
+
         This method should return None, if no corresponding EOL page ID can be found.
         If the outcome is ambiguous (because the same `identifier` exists in multiple
         data provider namespaces) and no `data_provider` is given for disambiguation,
         a list of all corresponding EOL page IDs is returned.
+
+        If provided a list of identifiers, a corresponding list with EOL page IDs is
+        returned. The returned list will have the same order as the given identifiers.
+        If no corresponding EOL page ID could be retrieved, the corresponding value
+        will be None.
         """
         return self._access_dataframe_for_id(
             data_provider=data_provider,
@@ -121,12 +134,34 @@ class IdentifierConverter:
     def _access_dataframe_for_id(
         self,
         id_provider_column_name: str,
-        search_value: Union[str, int],
+        search_value: Union[str, int, list[Union[str, int]]],
         column_to_return: str,
         data_provider: DataProvider = None,
     ) -> Optional[Union[str, List[str]]]:
-        df = self.data_frame
-        df_corresponding_ids = df.loc[df[id_provider_column_name] == search_value]
+        if isinstance(search_value, (str, int)):
+            result = self._process_single_value(
+                search_value,
+                self.data_frame,
+                id_provider_column_name,
+                column_to_return,
+                data_provider,
+            )
+        else:
+            result = self._process_list(
+                search_value, self.data_frame, id_provider_column_name, column_to_return
+            )
+
+        return result
+
+    def _process_single_value(
+        self,
+        value: Union[str, int],
+        df: pd.DataFrame,
+        id_provider_column_name: str,
+        column_to_return: str,
+        data_provider: Optional[DataProvider] = None,
+    ) -> str:
+        df_corresponding_ids = df.loc[df[id_provider_column_name] == value]
 
         if df_corresponding_ids.empty:
             return None
@@ -139,8 +174,25 @@ class IdentifierConverter:
 
         corresponding_ids = df_corresponding_ids.loc[:, column_to_return]
         string_representation = corresponding_ids.to_string(index=False)
+
         return (
             string_representation
             if len(corresponding_ids) == 1
             else string_representation.split()
         )
+
+    def _process_list(
+        self,
+        values: list[Union[str, int]],
+        df: pd.DataFrame,
+        id_provider_column_name: str,
+        column_to_return: str,
+    ) -> list[str]:
+        df_for_search_values = df.loc[df.isin(values)[id_provider_column_name]]
+
+        search_value_look_up = {
+            row[id_provider_column_name]: str(row[column_to_return])
+            for _, row in df_for_search_values.iterrows()
+        }
+
+        return [search_value_look_up.get(v) for v in values]
