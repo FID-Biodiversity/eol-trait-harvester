@@ -24,9 +24,38 @@ exclude = ["tests*"]
 [project.optional-dependencies]
 dev = [
     "pytest~=7.1",
-    "black",
     "python-dotenv~=0.20",
+
+    "pre-commit",
+    "black",
     "isort",
-    "pylint",
-    "mypy"
+    "flake8",
+    "flake8-bugbear",
+
+    # Security
+    "safety",
+    "bandit",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unused_configs = true
+
+[tool.pylint]
+ignore-patterns = [
+    "test_.*?py",
+    "conftest.py",
+]
+ignore-paths = [
+    "^tests/resources/.*$"
+]
+
+good-names = [
+    "db",
+    "ex",
+    "f",
+    "id",
+]
+
+[tool.isort]
+profile = "black"
