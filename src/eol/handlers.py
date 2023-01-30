@@ -1,20 +1,20 @@
 import json
+import logging
 import pathlib
 import re
-from typing import Any, Generator, List, Optional, Tuple, Union
+from typing import Any, Generator, List, Optional, Protocol, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import requests
 
 
-class DataHandler:
+class DataHandler(Protocol):
     """An interface class for all EOL sources.
     All Handler classes should obey this schema, although not inherit from it.
     """
 
     def iterate(self) -> Generator[dict, None, None]:
-
         """Returns a generator yielding the items in the data source."""
         ...
 
@@ -25,6 +25,7 @@ class DataHandler:
         If a `value` is given, only data having this value will be returned.
         If the key and/or the value cannot be found, an empty DataFrame is returned.
         """
+        ...
 
 
 class EolTraitCsvHandler:
@@ -122,15 +123,14 @@ class EolTraitApiHandler:
     def __init__(self, api_credentials):
         self.api_credentials = api_credentials
         self.session = create_http_session(api_credentials)
+        self.logger = logging.getLogger(__name__)
 
     def iterate(self) -> Generator[dict, None, None]:
         """Returns a generator yielding the items in the data source."""
         iterate_everything_query_string = "MATCH (trait:Trait) RETURN trait LIMIT 100;"
         return self.iterate_cypher_response_for_query(iterate_everything_query_string)
 
-    def iterate_data_by_key(
-        self, key: str, value: Optional[Any] = None
-    ) -> Generator[dict, None, None]:
+    def iterate_data_by_key(self, key: str, value: str) -> Generator[dict, None, None]:
         """Iterate all data for the given key.
         If a `value` is given, only data having this value will be returned.
         If the key and/or the value cannot be found, an empty DataFrame is returned.
@@ -146,6 +146,7 @@ class EolTraitApiHandler:
         self, cypher_query_string: str
     ) -> Generator[dict, None, None]:
         for response in self.paginate_cypher_api(cypher_query_string):
+            self.logger.debug(f"Received EOL API response: {response}")
             self.raise_if_response_contains_error(response)
 
             for data in self.convert_cypher_response_data_to_list(response.text):
@@ -176,10 +177,7 @@ class EolTraitApiHandler:
         if cypher_query_string.endswith(";"):
             cypher_query_string = cypher_query_string[:-1]
 
-        limit_count, limit_string = self.extract_limit_count_and_string(
-            cypher_query_string
-        )
-        limit_count = int(limit_count)
+        limit_count, limit_string = extract_limit_count_and_string(cypher_query_string)
 
         # Remove limit count, it has to come after (!) the SKIP
         cypher_query_string = cypher_query_string.replace(limit_string, "")
@@ -200,6 +198,9 @@ class EolTraitApiHandler:
             number_of_returned_entries += limit_count
 
     def read_api_with_parameters(self, url: str, **kwargs):
+        self.logger.debug(f"Calling EOL with URL: '{url}'")
+        self.logger.debug(f"Using additional Parameters: {kwargs}")
+
         return self.session.post(url, params=kwargs)
 
     def compose_cypher_url(self, cypher_query: str) -> str:
@@ -209,11 +210,6 @@ class EolTraitApiHandler:
         empty_data_indication_string = '"data":[]'
         return empty_data_indication_string in cypher_response.text.replace(": ", ":")
 
-    def extract_limit_count_and_string(self, query_string: str) -> Tuple[str, str]:
-        """Returns the limit count and the complete limit string, in this order."""
-        regex_limit_count = re.search("(LIMIT ([0-9]+))", query_string, re.IGNORECASE)
-        return regex_limit_count.group(2), regex_limit_count.group(1)
-
     def raise_if_response_contains_error(self, response):
         if response.status_code != 200:
             raise SyntaxError(
@@ -221,6 +217,7 @@ class EolTraitApiHandler:
             )
 
     def convert_cypher_response_data_to_list(self, response_data: str) -> List[dict]:
+        self.logger.debug("Converting response data to JSON!")
         data_json = json.loads(response_data)
         column_names = data_json["columns"]
         return [
@@ -269,7 +266,9 @@ class EolTraitApiHandler:
     LIMIT {query_limit}"""
 
 
-def create_http_session(credentials=None, headers: dict = None) -> requests.Session:
+def create_http_session(
+    credentials=None, headers: Optional[dict] = None
+) -> requests.Session:
     """Establishes a reusable HTTP session."""
     session = requests.Session()
 
@@ -282,10 +281,17 @@ def create_http_session(credentials=None, headers: dict = None) -> requests.Sess
     return session
 
 
-def extract_limit_count_and_string(query_string: str) -> Tuple[str, str]:
+def extract_limit_count_and_string(query_string: str) -> Tuple[int, str]:
     """Returns the limit count and the complete limit string, in this order."""
     regex_limit_count = re.search("(LIMIT ([0-9]+))", query_string, re.IGNORECASE)
-    return regex_limit_count.group(2), regex_limit_count.group(1)
+
+    if regex_limit_count is None:
+        raise ValueError(
+            f"The given query string '{query_string}' "
+            f"does not stick the convention!"
+        )
+
+    return int(regex_limit_count.group(2)), regex_limit_count.group(1)
 
 
 def raise_if_response_contains_error(response):

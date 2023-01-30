@@ -9,7 +9,7 @@ import pathlib
 from typing import List, Optional, Set, Union
 
 from eol.conversions import IdentifierConverter
-from eol.data import DataProvider, read_csv_file
+from eol.data import DataProvider
 from eol.handlers import DataHandler
 from eol.normalization import Normalizer
 from eol.triple_generator import Triple, TripleGenerator, deduplicate_triples
@@ -24,7 +24,7 @@ class EncyclopediaOfLifeProcessing:
         self,
         data_handler: DataHandler,
         data_normalizer: Normalizer,
-        data_provider_mapping_csv_file_path: pathlib.Path = None,
+        data_provider_mapping_csv_file_path: Optional[pathlib.Path] = None,
     ):
         self.data_handler = data_handler
         self.data_normalizer = data_normalizer
@@ -51,7 +51,7 @@ class EncyclopediaOfLifeProcessing:
                 "You have to provide a data provider mapping CSV file!"
             )
 
-        self.logger.debug(f"Converting EOL ID {eol_page_id} to GBIF ID...")
+        self.logger.debug("Converting EOL ID %s to GBIF ID...", eol_page_id)
 
         return self.identifier_converter.from_eol_page_id(
             eol_page_id, DataProvider.Gbif
@@ -66,15 +66,15 @@ class EncyclopediaOfLifeProcessing:
                 "You have to provide a data provider mapping CSV file!"
             )
 
-        self.logger.debug(f"Converting GBIF ID {gbif_id} to EOL ID...")
+        self.logger.debug("Converting GBIF ID %s to EOL ID...", gbif_id)
 
         return self.identifier_converter.to_eol_page_id(gbif_id, DataProvider.Gbif)
 
     def get_trait_data_for_eol_page_id(
         self,
         eol_page_id: str,
-        filter_for_predicates: Set[
-            str
+        filter_for_predicates: Optional[
+            Set[str]
         ] = None,  # filter for results in triples. None for no filter
     ) -> List[Triple]:  # function returns list of triple objects
         """Returns a list of Triple objects containing trait data for the given EOL
@@ -103,7 +103,7 @@ class EncyclopediaOfLifeProcessing:
 
 
 def filter_triples_for_predicates(
-    triples: Set[Triple], filter_for_predicates: Set[str]
+    triples: Set[Triple], filter_for_predicates: Optional[Set[str]]
 ) -> Set[Triple]:
     """Returns a list containing only Triples that have a predicate
     that was given in `filter_for_predicates`.
