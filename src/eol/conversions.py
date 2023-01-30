@@ -80,7 +80,9 @@ class IdentifierConverter:
         return self._csv_dataframe
 
     def to_eol_page_id(
-        self, identifier: Union[str, int, list[Union[str, int]]], data_provider: DataProvider = None
+        self,
+        identifier: Union[str, int, list[Union[str, int]]],
+        data_provider: DataProvider = None,
     ) -> Optional[Union[List[str], str]]:
         """Returns the corresponding EOL page ID for the given provider ID.
 

@@ -1,6 +1,6 @@
 import pytest
 
-from eol.triple_generator import TripleGenerator, Triple
+from eol.triple_generator import Triple, TripleGenerator
 
 
 class TestTripleGenerator:
@@ -95,7 +95,9 @@ class TestTripleGenerator:
         indirect=["triple_data"],
     )
     def test_create_triples(self, triple_generator, triple_data, expected_triples):
-        """Given a single EOL normalized dataset, the correct Triple(s) are generated."""
+        """Given a single EOL normalized dataset, the correct Triple(s) are
+        generated.
+        """
         triples = triple_generator.create_triples(triple_data)
         assert triples == expected_triples
 
@@ -115,7 +117,7 @@ class TestTripleGenerator:
             "predicate": "http://rs.tdwg.org/dwc/terms/habitat",
             "resource_id": 459,
             "resource_pk": None,
-            "scientific_name": "<i>Adoncholaimus quadriporus</i> Belogurova & Belogurov "
+            "scientific_name": "<i>Adoncholaimus quadriporus</i> Belogurova & Belogurov"
             "1974",
             "units": None,
             "units_uri": None,

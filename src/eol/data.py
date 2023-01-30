@@ -2,7 +2,7 @@ import pathlib
 from enum import Enum
 from functools import partial
 from io import StringIO
-from typing import Union, Tuple, List, Generator
+from typing import Generator, List, Tuple, Union
 
 import pandas as pd
 
@@ -37,9 +37,11 @@ def read_csv_file(
     delimiter: str = ",",
     dtypes: dict = None,
 ) -> pd.DataFrame:
-    """Reads an arbitrary large CSV file, filters the data while reading and returns the corresponding DataFrame.
-    `filter_criteria` and `column_index` have to be either None or have to have the same length! If neither is
-     the case, a ValueError will be thrown!
+    """Reads an arbitrary large CSV file, filters the data while reading and returns
+    the corresponding DataFrame.
+
+    `filter_criteria` and `column_index` have to be either None or have to have
+    the same length! If neither is the case, a ValueError will be thrown!
     """
     with open(csv_file_path, "r") as in_file:
         column_names = next(in_file)  # The first line should be the column names
@@ -63,8 +65,8 @@ def generate_dataframe_from_stream(
     column_names: List[str] = None,
 ) -> pd.DataFrame:
     """Takes an open file stream from a CSV file and converts a DataFrame from it.
-    `filter_criteria` and `column_index` have to be both None or have to have the same length! If either
-    is not the case, a ValueError will be thrown!
+    `filter_criteria` and `column_index` have to be both None or have to have the
+    same length! If either is not the case, a ValueError will be thrown!
     """
     if filter_criteria is not None and len(filter_criteria) != len(column_index):
         raise ValueError(

@@ -6,6 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from eol.handlers import EolTraitApiHandler
+
 from .commons import internet_connection_available
 
 

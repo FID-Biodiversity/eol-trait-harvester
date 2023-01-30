@@ -6,8 +6,8 @@ import pytest
 from dotenv import load_dotenv
 
 from eol import EncyclopediaOfLifeProcessing
-from eol.handlers import EolTraitCsvHandler, EolTraitApiHandler
-from eol.normalization import EolTraitCsvNormalizer, EolTraitApiNormalizer
+from eol.handlers import EolTraitApiHandler, EolTraitCsvHandler
+from eol.normalization import EolTraitApiNormalizer, EolTraitCsvNormalizer
 
 
 @pytest.fixture(scope="session")

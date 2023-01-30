@@ -1,6 +1,7 @@
 from typing import Iterable, Union
 
 import pytest
+
 from eol import EncyclopediaOfLifeProcessing, IdentifierConverterNotSetError
 from eol.triple_generator import Triple
 
@@ -8,17 +9,21 @@ from eol.triple_generator import Triple
 class TestEolProcessing:
     """
     General:
-        * The process intensive calculations should be done only ONCE! If I call a function of the class the first time,
-            I am willing to wait some seconds. However, when I call any other method after that, I want the result
-            immediately. Hence, the EOL CSV data should be processed only once - as efficient as possible!
-        * The module should provide an enum class that contains the predicates for the currently most relevant traits.
+        * The process intensive calculations should be done only ONCE! If I call
+            a function of the class the first time, I am willing to wait some seconds.
+            However, when I call any other method after that, I want the result
+            immediately. Hence, the EOL CSV data should be processed only once -
+            as efficient as possible!
+        * The module should provide an enum class that contains the predicates
+            for the currently most relevant traits.
             Hence, I should be able to write code like this:
-                filter_by_trait(data, filter_trait=EolTerms.IS_EATEN_BY), where EolTerms.IS_EATEN_BY corresponds to
+                filter_by_trait(data, filter_trait=EolTerms.IS_EATEN_BY), where
+                EolTerms.IS_EATEN_BY corresponds to
                 "http://purl.obolibrary.org/obo/RO_0002471".
-                In case, you don't know Enum classes: https://www.tutorialspoint.com/enum-in-python .
         * Tests should run fast! Hence, I recommend not using the complete EOL dataset,
-            but create a small subset (some MB instead of several GB) that represents the original data appropriately
-            but will be fast to process! Of course, this test data should be check-in into the repo.
+            but create a small subset (some MB instead of several GB) that represents
+            the original data appropriately but will be fast to process!
+            Of course, this test data should be check-in into the repo.
     """
 
     @pytest.mark.parametrize("eol_page_id", ["1234", "-1"])
@@ -42,10 +47,12 @@ class TestEolProcessing:
     ):
         """
         Feature: Retrieval of taxon trait data from EOL CSV
-            Scenario: The user gives a EOL page ID as parameter and wants only the data for the given EOL page ID.
+            Scenario: The user gives a EOL page ID as parameter and wants only the
+                      data for the given EOL page ID.
                 GIVEN an EOL page ID is given as parameter
                 WHEN the EOL page ID is valid
-                THEN the function should return a list containing the EOL trait data for only the given EOL page ID.
+                THEN the function should return a list containing the EOL trait data
+                     for only the given EOL page ID.
         """
         species_traits = eol.get_trait_data_for_eol_page_id("311544")
         assert len(species_traits) == expected_trait_count
@@ -53,11 +60,12 @@ class TestEolProcessing:
     @pytest.mark.parametrize(["eol"], [("csv",), ("api",)], indirect=True)
     def test_correct_trait_data_is_retrieved(self, eol: EncyclopediaOfLifeProcessing):
         """
-        Feature: The module returns a set of EolData data class objects (https://docs.python.org/3/library/dataclasses.html)
-            with the correct data.
+        Feature: The module returns a set of EolData data class objects
+            (https://docs.python.org/3/library/dataclasses.html) with the correct data.
             Scenario: The user expects to receive correct data.
                 GIVEN a valid EOL page ID is given as parameter
-                THEN the function should return a set of EolTrait objects with the correct data.
+                THEN the function should return a set of EolTrait objects with
+                     the correct data.
         """
         eol_page_id = "1143547"
         taxon_trait_data = eol.get_trait_data_for_eol_page_id(eol_page_id)
@@ -89,8 +97,8 @@ class TestEolProcessing:
             Scenario: The user only wants a subset of the available trait data.
                 GIVEN a valid EOL page ID is given as parameter
                     AND a list of filter predicates is given as parameter
-                THEN the function should return only a subset of the trait data of the given taxon, containing only
-                    data fitting the given filter.
+                THEN the function should return only a subset of the trait data
+                     of the given taxon, containing only data fitting the given filter.
         """
         eol_page_id = "1143547"
         predicate_filters = {

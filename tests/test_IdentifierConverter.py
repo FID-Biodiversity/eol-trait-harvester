@@ -1,7 +1,8 @@
 import pathlib
 
 import pytest
-from eol import IdentifierConverter, DataProvider
+
+from eol import DataProvider, IdentifierConverter
 
 
 class TestIdentifierConverter:

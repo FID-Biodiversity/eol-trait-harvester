@@ -5,7 +5,7 @@ Created on Mon Sep 19 10:34:39 2022
 @author: TAHIR
 """
 from dataclasses import dataclass
-from typing import Optional, Union, List, Iterable
+from typing import Iterable, List, Optional, Union
 
 import eol.variables as variables
 
@@ -104,7 +104,7 @@ class Objectclass_source:
             for triple in triples:
                 triple.source_url = source_url
                 triple.citation_text = citation_text
-        return triples  # gibt komplette triples-Liste zurück, chain of responsibility zu Ende
+        return triples
 
 
 def create_triple(triple_data: dict, obj_value: [str, int, float], unit: str = None):
@@ -118,11 +118,8 @@ def create_triple(triple_data: dict, obj_value: [str, int, float], unit: str = N
 
 def deduplicate_triples(triples: Iterable[Triple]) -> List[Triple]:
     """data from list -> set -> sorted list"""
-    triple_set = set(triples)  # data from list -> set (unsorted)
-    return sorted(
-        triple_set, key=lambda triple: (triple.subject, triple.predicate)
-    )  # way of sorting
-    # lambda takes triple and returns the triple's subject
+    triple_set = set(triples)
+    return sorted(triple_set, key=lambda triple: (triple.subject, triple.predicate))
 
 
 def is_string_float_or_integer(string: str) -> float:

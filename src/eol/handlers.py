@@ -1,7 +1,7 @@
 import json
 import pathlib
 import re
-from typing import Generator, Union, Optional, Any, Tuple, List
+from typing import Any, Generator, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -234,7 +234,8 @@ class EolTraitApiHandler:
         values = [f'"{v}"' if str(v).startswith("http") else v for v in values]
 
         # The ORDER BY command is mandatory to make pagination predictable.
-        # In Neo4J, the return order may (!) be continuous, but it seems to depend on the data.
+        # In Neo4J, the return order may (!) be continuous, but it seems to
+        # depend on the data.
         order_by_variable = "t.eol_pk"
         return_variables = [
             "obj.name",
