@@ -1,3 +1,5 @@
+"""Holds all DataHandlers to process EOL data."""
+
 import json
 import logging
 import pathlib
@@ -16,7 +18,6 @@ class DataHandler(Protocol):
 
     def iterate(self) -> Generator[dict, None, None]:
         """Returns a generator yielding the items in the data source."""
-        ...
 
     def iterate_data_by_key(
         self, key: str, value: Optional[Any] = None
@@ -25,7 +26,6 @@ class DataHandler(Protocol):
         If a `value` is given, only data having this value will be returned.
         If the key and/or the value cannot be found, an empty DataFrame is returned.
         """
-        ...
 
 
 class EolTraitCsvHandler:
@@ -65,8 +65,8 @@ class EolTraitCsvHandler:
 
     def iterate(self) -> Generator[dict, None, None]:
         """Returns a generator yielding the items in the data source."""
-        for index, csv_row_data in self.get_data().iterrows():
-            yield convert_pandas_object_to_dict(csv_row_data)
+        for _, csv_row_data in self.get_data().iterrows():
+            yield _convert_pandas_object_to_dict(csv_row_data)
 
     def iterate_data_by_key(self, key: str, value: Any) -> Generator[dict, None, None]:
         """Iterate all data for the given key, which also has to have the given `value`.
@@ -75,8 +75,8 @@ class EolTraitCsvHandler:
         df = self.get_data()
         data = df.loc[df[key] == value]
 
-        for index, series in data.iterrows():
-            yield convert_pandas_object_to_dict(series)
+        for _, series in data.iterrows():
+            yield _convert_pandas_object_to_dict(series)
 
     def get_data(self) -> pd.DataFrame:
         """Get the complete dataset available."""
@@ -137,7 +137,7 @@ class EolTraitApiHandler:
         """
         key = self.normalize_key_parameter(key)
 
-        filtered_iteration_string = self.convert_key_value_pairs_to_cypher_query(
+        filtered_iteration_string = self._convert_key_value_pairs_to_cypher_query(
             keys=[key], values=[value]
         )
         return self.iterate_cypher_response_for_query(filtered_iteration_string)
@@ -145,14 +145,23 @@ class EolTraitApiHandler:
     def iterate_cypher_response_for_query(
         self, cypher_query_string: str
     ) -> Generator[dict, None, None]:
-        for response in self.paginate_cypher_api(cypher_query_string):
-            self.logger.debug(f"Received EOL API response: {response}")
-            self.raise_if_response_contains_error(response)
+        """Iterate a Neo4J database with the given query."""
+        limit_count, _ = extract_limit_count_and_string(cypher_query_string)
 
-            for data in self.convert_cypher_response_data_to_list(response.text):
+        for response in self.paginate_cypher_api(cypher_query_string):
+            self.logger.debug("Received EOL API response: %s", response)
+            self._raise_if_response_contains_error(response)
+
+            response_data = self._convert_cypher_response_data_to_list(response.text)
+            for data in response_data:
                 yield data
 
+            # The last page is indicated by not being of the same size as the LIMIT
+            if len(response_data) < limit_count:
+                break
+
     def normalize_key_parameter(self, parameter_name: str) -> str:
+        """Normalizes a Neo4J variable to fit the EOL server schema."""
         return self.parameter_name_normalizations.get(parameter_name, parameter_name)
 
     def get_data_from_cypher_api(self, cypher_query_string: str) -> List[dict]:
@@ -162,9 +171,9 @@ class EolTraitApiHandler:
         url = self.compose_cypher_url(cypher_query_string)
         response = self.read_api_with_parameters(url)
 
-        self.raise_if_response_contains_error(response)
+        self._raise_if_response_contains_error(response)
 
-        return self.convert_cypher_response_data_to_list(response.text)
+        return self._convert_cypher_response_data_to_list(response.text)
 
     def paginate_cypher_api(self, cypher_query_string: str, **kwargs) -> Generator:
         """Yields successively the responses of a paging of the EOL Cypher API."""
@@ -191,41 +200,41 @@ class EolTraitApiHandler:
             cypher_response = self.read_api_with_parameters(ready_url, **kwargs)
 
             if self._is_data_response_empty(cypher_response):
+                self.logger.info("Response is empty!")
                 return
-            else:
-                yield cypher_response
+
+            yield cypher_response
 
             number_of_returned_entries += limit_count
 
     def read_api_with_parameters(self, url: str, **kwargs):
-        self.logger.debug(f"Calling EOL with URL: '{url}'")
-        self.logger.debug(f"Using additional Parameters: {kwargs}")
+        """Calls the URL with the given URL parameters."""
+        self.logger.debug("Calling EOL with URL: '%s'", url)
+        self.logger.debug("Using additional Parameters: %s", kwargs)
 
         return self.session.post(url, params=kwargs)
 
     def compose_cypher_url(self, cypher_query: str) -> str:
+        """Adds the given query to the EOL REST-API base URL."""
         return f"https://eol.org/service/cypher?query={cypher_query.strip()}"
 
     def _is_data_response_empty(self, cypher_response) -> bool:
         empty_data_indication_string = '"data":[]'
         return empty_data_indication_string in cypher_response.text.replace(": ", ":")
 
-    def raise_if_response_contains_error(self, response):
+    def _raise_if_response_contains_error(self, response):
         if response.status_code != 200:
             raise SyntaxError(
                 f"The EOL API returned with an error! Message: {response}"
             )
 
-    def convert_cypher_response_data_to_list(self, response_data: str) -> List[dict]:
+    def _convert_cypher_response_data_to_list(self, response_data: str) -> List[dict]:
         self.logger.debug("Converting response data to JSON!")
         data_json = json.loads(response_data)
         column_names = data_json["columns"]
-        return [
-            {name: value for name, value in zip(column_names, element)}
-            for element in data_json["data"]
-        ]
+        return [dict(zip(column_names, element)) for element in data_json["data"]]
 
-    def convert_key_value_pairs_to_cypher_query(
+    def _convert_key_value_pairs_to_cypher_query(
         self, keys: List[str], values: List[str], query_limit: int = 100
     ) -> str:
         values = [f'"{v}"' if str(v).startswith("http") else v for v in values]
@@ -295,11 +304,12 @@ def extract_limit_count_and_string(query_string: str) -> Tuple[int, str]:
 
 
 def raise_if_response_contains_error(response):
+    """Raises a SyntaxError, if the given response does not have an HTTP Status 200."""
     if response.status_code != 200:  # http code for recheck
         raise SyntaxError(f"The EOL API returned with an error! Message: {response}")
 
 
-def convert_pandas_object_to_dict(pandas_obj) -> dict:
+def _convert_pandas_object_to_dict(pandas_obj) -> dict:
     if isinstance(pandas_obj, pd.Series):
         new_dict = dict(pandas_obj.to_dict())
     else:
@@ -308,11 +318,3 @@ def convert_pandas_object_to_dict(pandas_obj) -> dict:
         new_dict = new_dict[keys[0]]
 
     return new_dict
-
-
-if __name__ == "__main__":
-    from pprint import pprint
-
-    eol = EolTraitCsvHandler("../../tests/data/test_eol_traits.csv")
-    data = next(eol.iterate_data_by_key(key="page_id", value=45258442))
-    pprint(data)

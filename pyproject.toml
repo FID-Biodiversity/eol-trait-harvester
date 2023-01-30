@@ -54,9 +54,7 @@ ignore-paths = [
 
 good-names = [
     "db",
-    "ex",
-    "f",
-    "id",
+    "df"
 ]
 
 [tool.isort]
