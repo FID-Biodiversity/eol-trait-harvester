@@ -23,5 +23,5 @@ jobs:
         python -m pip install tox tox-gh-actions
     - name: Test with tox
       env:
-        EOL_API_KEY: ${{ secrets.EOL_API_KEY }}
+        EOL_API_TOKEN: ${{ secrets.EOL_API_TOKEN }}
       run: tox
