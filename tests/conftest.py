@@ -30,7 +30,8 @@ def eol_api_credentials(current_directory) -> Optional[str]:
     load_dotenv()
 
     token = os.environ.get("EOL_API_TOKEN")
-    return f"JWT {token}" if token is not None else None
+    assert token is not None
+    return f"JWT {token}"
 
 
 @pytest.fixture
