@@ -50,10 +50,12 @@ def eol_with_csv_handler(eol_trait_csv_file_path) -> EncyclopediaOfLifeProcessin
 
 @pytest.fixture
 def eol_with_api_handler(eol_api_credentials) -> EncyclopediaOfLifeProcessing:
-    handler = EolTraitApiHandler(eol_api_credentials)
-    normalizer = EolTraitApiNormalizer()
+    return create_eol_object_with_key(eol_api_credentials)
 
-    return EncyclopediaOfLifeProcessing(handler, normalizer)
+
+@pytest.fixture
+def eol_with_invalid_credentials() -> EncyclopediaOfLifeProcessing:
+    return create_eol_object_with_key(eol_key_string=None)
 
 
 @pytest.fixture
@@ -76,3 +78,12 @@ def eol_with_provider_ids(
     normalizer = EolTraitCsvNormalizer()
 
     return EncyclopediaOfLifeProcessing(handler, normalizer, provider_ids_csv_file_path)
+
+
+def create_eol_object_with_key(
+    eol_key_string: Optional[str],
+) -> EncyclopediaOfLifeProcessing:
+    handler = EolTraitApiHandler(eol_key_string)
+    normalizer = EolTraitApiNormalizer()
+
+    return EncyclopediaOfLifeProcessing(handler, normalizer)

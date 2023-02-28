@@ -160,6 +160,15 @@ class TestEolProcessing:
         with pytest.raises(IdentifierConverterNotSetError):
             eol.get_gbif_id_for_eol_page_id("46559130")
 
+    def test_throw_meaningful_exception_when_api_key_is_not_valid(
+        self, eol_with_invalid_credentials
+    ):
+        """Feature: When the given EOL API key is either None or is rejected
+        by the EOL API, a meaningful exception should be thrown.
+        """
+        with pytest.raises(ValueError):
+            eol_with_invalid_credentials.get_trait_data_for_eol_page_id("21828356")
+
 
 def trait_exists(
     subject: str, predicate: str, obj: Union[str, float], trait_data: Iterable[Triple]

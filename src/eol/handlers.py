@@ -212,6 +212,9 @@ class EolTraitApiHandler:
         self.logger.debug("Calling EOL with URL: '%s'", url)
         self.logger.debug("Using additional Parameters: %s", kwargs)
 
+        if self.api_credentials is None:
+            raise ValueError("The API key is None! Please provide a valid EOL API key.")
+
         return self.session.post(url, params=kwargs)
 
     def compose_cypher_url(self, cypher_query: str) -> str:
