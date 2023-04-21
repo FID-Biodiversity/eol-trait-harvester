@@ -1,3 +1,7 @@
+"""Module on converting the identifiers of different biodiversity providers into
+each other.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -83,7 +87,7 @@ class IdentifierConverter:
         self,
         identifier: Union[str, int, list[Union[str, int]]],
         data_provider: DataProvider = None,
-    ) -> Optional[Union[List[str], str]]:
+    ) -> Optional[Union[List[Optional[str]], str]]:
         """Returns the corresponding EOL page ID for the given provider ID.
 
         This method should return None, if no corresponding EOL page ID can be found.
@@ -105,7 +109,7 @@ class IdentifierConverter:
 
     def from_eol_page_id(
         self, eol_page_id: str, data_provider: DataProvider = None
-    ) -> Optional[Union[List[str], str]]:
+    ) -> Optional[Union[List[Optional[str]], Optional[str]]]:
         """Returns the corresponding ID in the provider data for the given EOL page ID.
         This method should return None, if no corresponding ID can be found.
         If the outcome is ambiguous (because there are multiple relevant data providers
@@ -139,7 +143,8 @@ class IdentifierConverter:
         search_value: Union[str, int, list[Union[str, int]]],
         column_to_return: str,
         data_provider: DataProvider = None,
-    ) -> Optional[Union[str, List[str]]]:
+    ) -> Optional[Union[Optional[str], List[Optional[str]]]]:
+
         if isinstance(search_value, (str, int)):
             result = self._process_single_value(
                 search_value,
@@ -149,20 +154,20 @@ class IdentifierConverter:
                 data_provider,
             )
         else:
-            result = self._process_list(
+            result = self._process_list(  # type: ignore
                 search_value, self.data_frame, id_provider_column_name, column_to_return
             )
 
         return result
 
-    def _process_single_value(
+    def _process_single_value(  # pylint: disable=too-many-arguments
         self,
         value: Union[str, int],
         df: pd.DataFrame,
         id_provider_column_name: str,
         column_to_return: str,
         data_provider: Optional[DataProvider] = None,
-    ) -> str:
+    ) -> Optional[str]:
         df_corresponding_ids = df.loc[df[id_provider_column_name] == value]
 
         if df_corresponding_ids.empty:
@@ -189,8 +194,8 @@ class IdentifierConverter:
         df: pd.DataFrame,
         id_provider_column_name: str,
         column_to_return: str,
-    ) -> list[str]:
-        df_for_search_values = df.loc[df.isin(values)[id_provider_column_name]]
+    ) -> list[Optional[str]]:
+        df_for_search_values = df.loc[df[id_provider_column_name].isin(values)]
 
         search_value_look_up = {
             row[id_provider_column_name]: str(row[column_to_return])

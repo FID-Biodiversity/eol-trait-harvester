@@ -53,6 +53,7 @@ ignore-patterns = [
 ignore-paths = [
     "^tests/resources/.*$"
 ]
+disable = ["import-error"]
 
 good-names = [
     "db",

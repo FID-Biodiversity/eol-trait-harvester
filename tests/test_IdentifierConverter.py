@@ -46,7 +46,12 @@ class TestIdentifierConverter:
     def test_get_eol_id_for_corresponding_gbif_id(
         self, id_converter, gbif_id, expected_eol_page_id
     ):
-        """Feature: The module returns the correct EOL page ID for a GBIF ID."""
+        """Feature: The module returns the correct EOL page ID for a GBIF ID.
+
+        If provided a list of IDs, a new list is returned with the corresponding
+        IDs in the correct order. If for any ID a conversion is not possible,
+        None is added at this position in the returned list.
+        """
         eol_id = id_converter.to_eol_page_id(gbif_id)
         assert eol_id == expected_eol_page_id
 
