@@ -23,7 +23,7 @@ exclude = ["tests*"]
 
 [project.optional-dependencies]
 dev = [
-    "pytest~=7.1",
+    "pytest~=8.0",
     "python-dotenv~=1.0",
     "pytest-cov",
     "tox",
